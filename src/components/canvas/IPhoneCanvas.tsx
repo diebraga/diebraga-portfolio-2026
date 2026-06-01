@@ -21,22 +21,11 @@ function CameraZoom({ isOpen }: { isOpen: boolean }) {
   return null;
 }
 
-function Laptop() {
-  const { scene }           = useGLTF("/mac-draco.glb");
+function Phone() {
+  const { scene }           = useGLTF("/models/iphone-17-pro.glb");
   const groupRef            = useRef<THREE.Group>(null);
   const [isOpen, setIsOpen] = useState(false);
   const toggle              = useCallback(() => setIsOpen((p) => !p), []);
-  const openAngle           = useRef<number | null>(null);
-  const lidTarget           = useRef(Math.PI * 0.5);
-
-  useEffect(() => {
-    const screenflip = scene.getObjectByName("screenflip");
-    if (screenflip) {
-      openAngle.current     = screenflip.rotation.x;
-      screenflip.rotation.x = Math.PI * 0.5;
-      lidTarget.current     = Math.PI * 0.5;
-    }
-  }, [scene]);
 
   useEffect(() => {
     window.addEventListener("click", toggle);
@@ -50,18 +39,11 @@ function Laptop() {
       groupRef.current.position.y = isOpen
         ? THREE.MathUtils.lerp(groupRef.current.position.y, 0, 0.05)
         : Math.sin(t * 0.8) * 0.12;
-    }
 
-    lidTarget.current = isOpen
-      ? (openAngle.current ?? -Math.PI * 0.425)
-      : Math.PI * 0.5;
-
-    const screenflip = scene.getObjectByName("screenflip");
-    if (screenflip) {
-      screenflip.rotation.x = THREE.MathUtils.lerp(
-        screenflip.rotation.x,
-        lidTarget.current,
-        0.06,
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(
+        groupRef.current.rotation.y,
+        isOpen ? Math.PI : 0,
+        0.05,
       );
     }
   });
@@ -76,7 +58,7 @@ function Laptop() {
   );
 }
 
-export default function LaptopCanvas() {
+export default function IPhoneCanvas() {
   return (
     <Canvas
       shadows
@@ -90,7 +72,7 @@ export default function LaptopCanvas() {
       <ambientLight intensity={0.3} />
 
       <Suspense fallback={null}>
-        <Laptop />
+        <Phone />
       </Suspense>
 
       <Preload all />
@@ -98,4 +80,4 @@ export default function LaptopCanvas() {
   );
 }
 
-useGLTF.preload("/mac-draco.glb");
+useGLTF.preload("/models/iphone-17-pro.glb");
