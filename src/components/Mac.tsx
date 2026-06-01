@@ -18,14 +18,27 @@ export function Mac(props) {
   const { nodes, materials } = useGLTF("/mac-draco.glb") as any;
 
   const [isOpen, setIsOpen] = useState(false);
+
+  // New state to specifically control HTML visibility based on animation completion
+  const [showHtml, setShowHtml] = useState(false);
+
   const lidRef = useRef<THREE.Group>(null);
+  const isAnimating = useRef(false);
 
   const LID_CLOSED = 1.57;
   const LID_OPEN = 0.014;
 
   // 2. Handle Canvas/Window Click Events
   useEffect(() => {
-    const toggle = () => setIsOpen((prev) => !prev);
+    const toggle = () => {
+      isAnimating.current = true;
+
+      // If we are opening, show the HTML container immediately so it can animate up
+      setIsOpen((prev) => {
+        if (!prev) setShowHtml(true);
+        return !prev;
+      });
+    };
     window.addEventListener("click", toggle);
     return () => window.removeEventListener("click", toggle);
   }, []);
@@ -40,6 +53,23 @@ export function Mac(props) {
         targetRotation,
         0.06,
       );
+
+      // Check if the closing animation is completed
+      if (isAnimating.current) {
+        const distanceToTarget = Math.abs(
+          lidRef.current.rotation.x - targetRotation,
+        );
+
+        // Within 0.002 radians of the target resting position
+        if (distanceToTarget < 0.002) {
+          isAnimating.current = false;
+
+          // If the laptop target intent was closed, hide the HTML right now
+          if (!isOpen) {
+            setShowHtml(false);
+          }
+        }
+      }
     }
   });
 
@@ -72,7 +102,7 @@ export function Mac(props) {
           />
         </group>
 
-        <group position={[0, 2.965, -0.05]} rotation={[0, 0, 0]}>
+        <group position={[0, 3.05, -0.05]} rotation={[0, 0, 0]}>
           <Html
             transform
             pointerEvents={isOpen ? "auto" : "none"}
@@ -80,6 +110,8 @@ export function Mac(props) {
             style={{
               width: "100%",
               height: "100%",
+              // Uses our checked state variable to vanish safely without breaking layout scales
+              display: showHtml ? "block" : "none",
             }}
           >
             <div
@@ -92,11 +124,16 @@ export function Mac(props) {
               style={{
                 background: "#121212",
                 color: "#ffffff",
+                width: "1516px",
+                height: "992px",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
                 userSelect: "none",
+                borderRadius: "30px",
+                opacity: isOpen ? 1 : 0,
+                transition: "opacity 0.15s ease-out",
               }}
             >
               <h1 style={{ fontSize: "8rem", color: "#007aff" }}>
