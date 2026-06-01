@@ -1,80 +1,11 @@
 "use client";
 
-import { Suspense, useRef, useState, useEffect, useCallback } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Suspense } from "react";
+import { Canvas } from "@react-three/fiber";
 import { Preload, useGLTF } from "@react-three/drei";
-import * as THREE from "three";
+import { Mac } from "../Mac";
 
-const MODEL_Y = -2.6;
 const CLOSED_DISTANCE = 50;
-const OPENED_DISTANCE = 31;
-const LID_CLOSED = Math.PI * 0.5; //  90° — lid shut
-const LID_OPEN = 0; // 0° — fully flat/open
-
-function CameraZoom({ isOpen }: { isOpen: boolean }) {
-  const { camera } = useThree();
-  useFrame(() => {
-    camera.position.z = THREE.MathUtils.lerp(
-      camera.position.z,
-      isOpen ? OPENED_DISTANCE : CLOSED_DISTANCE,
-      0.05,
-    );
-  });
-  return null;
-}
-
-function Laptop() {
-  const { scene } = useGLTF("/mac-draco.glb");
-  const groupRef = useRef<THREE.Group>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const toggle = useCallback(() => setIsOpen((p) => !p), []);
-  const lidTarget = useRef(LID_CLOSED);
-
-  useEffect(() => {
-    const screenflip = scene.getObjectByName("screenflip");
-    if (screenflip) screenflip.rotation.x = LID_CLOSED;
-  }, [scene]);
-
-  useEffect(() => {
-    window.addEventListener("click", toggle);
-    return () => window.removeEventListener("click", toggle);
-  }, [toggle]);
-
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
-
-    if (groupRef.current) {
-      groupRef.current.position.y = isOpen
-        ? THREE.MathUtils.lerp(groupRef.current.position.y, 0, 0.05)
-        : Math.sin(t * 0.8) * 0.12;
-    }
-
-    lidTarget.current = isOpen ? LID_OPEN : LID_CLOSED;
-
-    const screenflip = scene.getObjectByName("screenflip");
-    if (screenflip) {
-      screenflip.rotation.x = THREE.MathUtils.lerp(
-        screenflip.rotation.x,
-        lidTarget.current,
-        0.06,
-      );
-    }
-  });
-
-  return (
-    <>
-      <CameraZoom isOpen={isOpen} />
-      <group ref={groupRef}>
-        <primitive
-          object={scene}
-          scale={0.9}
-          position={[0, MODEL_Y, 0]}
-          rotation={[0, 0, 0]}
-        />
-      </group>
-    </>
-  );
-}
 
 export default function LaptopCanvas() {
   return (
@@ -94,7 +25,7 @@ export default function LaptopCanvas() {
       <ambientLight intensity={0.3} />
 
       <Suspense fallback={null}>
-        <Laptop />
+        <Mac />
       </Suspense>
 
       <Preload all />
