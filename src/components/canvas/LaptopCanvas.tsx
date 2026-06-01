@@ -1,89 +1,43 @@
 "use client"
 
-import { Suspense, useEffect, useState, useRef } from "react"
-import { Canvas, useFrame } from "@react-three/fiber"
-import { OrbitControls, Preload, useGLTF, Float } from "@react-three/drei"
-import * as THREE from "three"
+import { Suspense } from "react"
+import { Canvas } from "@react-three/fiber"
+import { Preload, useGLTF } from "@react-three/drei"
 
-// ── Loader fallback ────────────────────────────────────────────────────────────
-
-function CanvasLoader() {
-  return (
-    <mesh>
-      <sphereGeometry args={[0.1, 16, 16]} />
-      <meshBasicMaterial color="#915eff" />
-    </mesh>
-  )
-}
-
-// ── Laptop mesh ────────────────────────────────────────────────────────────────
-
-interface LaptopProps {
-  isMobile: boolean
-}
-
-function Laptop({ isMobile }: LaptopProps) {
+function Laptop() {
   const { scene } = useGLTF("/mac-draco.glb")
-  const posRef = useRef({ x: 0, y: 0 })
-
-  useFrame(({ clock }) => {
-    posRef.current.x = Math.sin(clock.getElapsedTime()) * 0.2
-    posRef.current.y = Math.cos(clock.getElapsedTime()) * 0.2
-  })
 
   return (
-    <mesh>
-      <hemisphereLight intensity={0.15} groundColor="black" />
-      <spotLight
-        position={[-20, 50, 10]}
-        angle={0.12}
-        penumbra={1}
-        intensity={1}
-        castShadow
-        shadow-mapSize={new THREE.Vector2(1024, 1024)}
-      />
-      <pointLight intensity={1} />
-      <primitive
-        object={scene}
-        scale={isMobile ? 0.7 : 0.75}
-        position={[
-          isMobile ? posRef.current.x / 2 : posRef.current.x,
-          isMobile ? -3 : -3.25,
-          isMobile ? posRef.current.y / 2 - 2.2 : posRef.current.y - 1.5,
-        ]}
-        rotation={[0, Math.PI / 4, 0]}
-      />
-    </mesh>
+    <primitive
+      object={scene}
+      scale={1.2}
+      position={[0, -1.2, 0]}
+      rotation={[0, 0, 0]}
+    />
   )
 }
-
-// ── Canvas wrapper (exported) ──────────────────────────────────────────────────
 
 export default function LaptopCanvas() {
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 500px)")
-    setIsMobile(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
-    mq.addEventListener("change", handler)
-    return () => mq.removeEventListener("change", handler)
-  }, [])
-
   return (
     <Canvas
-      frameloop="always"
       shadows
       dpr={[1, 2]}
-      camera={{ position: [20, 3, 5], fov: 25 }}
+      camera={{ position: [0, 0, 6], fov: 40 }}
       gl={{ preserveDrawingBuffer: true }}
     >
-      <Suspense fallback={<CanvasLoader />}>
-        <OrbitControls makeDefault enableZoom={false} />
-        <Float>
-          <Laptop isMobile={isMobile} />
-        </Float>
+      {/* Key light — warm white from the front-top */}
+      <directionalLight position={[2, 4, 5]} intensity={2.5} color="#ffffff" />
+      {/* Fill light — soft from the left */}
+      <directionalLight position={[-4, 2, 2]} intensity={0.8} color="#c8d8ff" />
+      {/* Rim light — subtle from behind */}
+      <directionalLight position={[0, -2, -4]} intensity={0.4} color="#ffffff" />
+      {/* Ambient so shadows don't go fully black */}
+      <ambientLight intensity={0.3} />
+
+      <Suspense fallback={null}>
+        <Laptop />
       </Suspense>
+
       <Preload all />
     </Canvas>
   )
