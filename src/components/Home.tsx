@@ -3,8 +3,12 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
-const LaptopCanvas = dynamic(() => import("./canvas/LaptopCanvas"), { ssr: false });
-const IPhoneCanvas = dynamic(() => import("./canvas/IPhoneCanvas"), { ssr: false });
+const LaptopCanvas = dynamic(() => import("./canvas/LaptopCanvas"), {
+  ssr: false,
+});
+const IPhoneCanvas = dynamic(() => import("./canvas/IPhoneCanvas"), {
+  ssr: false,
+});
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -18,7 +22,7 @@ function useIsMobile() {
   return isMobile;
 }
 
-export default function HeroSection() {
+export default function Home() {
   const isMobile = useIsMobile();
 
   return (
