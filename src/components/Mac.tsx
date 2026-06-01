@@ -4,52 +4,63 @@ Command: npx gltfjsx@6.5.3 public/mac-draco.glb
 */
 
 import React, { useRef, useState, useEffect } from "react";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF, Html, PerspectiveCamera } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+
+// --- CAMERA CONFIGURATION ---
+// Lower CAMERA_Y to move down.
+// Increase CAMERA_Z to move back if the camera feels too close when you go low.
+const CAMERA_Y = 0.5;
+const CAMERA_Z = 18;
 
 export function Mac(props) {
   const { nodes, materials } = useGLTF("/mac-draco.glb") as any;
 
-  // 1. Core State and References
-  const [isOpen, setIsOpen] = useState(false); // Starts closed (false)
+  const [isOpen, setIsOpen] = useState(false);
   const lidRef = useRef<THREE.Group>(null);
 
-  // 2. Exact Radian Angle Logic
-  // Math.PI * 0.5 represents 90 degrees.
-  // In this model structure, adding 1.57 radians folds the screen flat against the base.
   const LID_CLOSED = 1.57;
-  const LID_OPEN = 0.014; // The original open/tilted position from your GLTF file
+  const LID_OPEN = 0.014;
 
-  // 3. Handle Canvas/Window Click Events
+  // 2. Handle Canvas/Window Click Events
   useEffect(() => {
     const toggle = () => setIsOpen((prev) => !prev);
     window.addEventListener("click", toggle);
     return () => window.removeEventListener("click", toggle);
   }, []);
 
-  // 4. Smooth Animation Loop Frame Interpolation
+  // 3. Smooth Animation Loop Frame Interpolation
   useFrame(() => {
     if (lidRef.current) {
       const targetRotation = isOpen ? LID_OPEN : LID_CLOSED;
 
-      // Linearly interpolates the rotation angle on every frame
       lidRef.current.rotation.x = THREE.MathUtils.lerp(
         lidRef.current.rotation.x,
         targetRotation,
-        0.06, // Lower = slower/smoother opening animation speed
+        0.06,
       );
     }
   });
 
   return (
     <group {...props} dispose={null}>
-      {/* 5. Bound the lidRef directly onto the hinge group component */}
+      {/* STATIC SCENE CAMERA 
+          Tied directly to the configuration variables at the top of the file.
+      */}
+      <PerspectiveCamera
+        makeDefault
+        position={[0, CAMERA_Y, CAMERA_Z]}
+        fov={45}
+      />
+
+      {/* 4. Animated Lid Hinge Group Component */}
       <group
         ref={lidRef}
         position={[0.002, -0.038, 0.414]}
-        rotation={[LID_CLOSED, 0, 0]} // Starts resting at the closed angle value
+        rotation={[LID_CLOSED, 0, 0]}
       >
+        {/* The original 3D laptop lid hardware meshes */}
         <group position={[0, 2.965, -0.13]} rotation={[Math.PI / 2, 0, 0]}>
           <mesh
             geometry={nodes.Cube008.geometry}
@@ -59,10 +70,40 @@ export function Mac(props) {
             geometry={nodes.Cube008_1.geometry}
             material={materials["matte.001"]}
           />
-          <mesh
-            geometry={nodes.Cube008_2.geometry}
-            material={materials["screen.001"]}
-          />
+        </group>
+
+        <group position={[0, 2.965, -0.05]} rotation={[0, 0, 0]}>
+          <Html
+            transform
+            pointerEvents={isOpen ? "auto" : "none"}
+            distanceFactor={2.2}
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            <div
+              className="laptop-html-screen"
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
+              style={{
+                background: "#121212",
+                color: "#ffffff",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                userSelect: "none",
+              }}
+            >
+              <h1 style={{ fontSize: "8rem", color: "#007aff" }}>
+                HI My Friend
+              </h1>
+            </div>
+          </Html>
         </group>
       </group>
 
