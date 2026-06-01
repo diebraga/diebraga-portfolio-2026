@@ -61,7 +61,8 @@ export default function LaptopCanvas() {
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.5, 28], fov: 42 }}
+      // ↓ CAMERA DISTANCE — change the last number (z) to zoom in/out
+      camera={{ position: [0, 0.5, 84], fov: 42 }}
       gl={{ preserveDrawingBuffer: true }}
     >
       <directionalLight position={[2, 4, 5]}   intensity={2.5} color="#ffffff" />
