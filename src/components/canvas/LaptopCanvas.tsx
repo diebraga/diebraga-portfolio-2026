@@ -5,67 +5,64 @@ import { Canvas, useFrame } from "@react-three/fiber"
 import { Preload, useGLTF } from "@react-three/drei"
 import * as THREE from "three"
 
-function Laptop() {
-  const { scene } = useGLTF("/mac-draco.glb")
-  const groupRef   = useRef<THREE.Group>(null)
-  const [isOpen, setIsOpen]   = useState(true)
-  const openAngle  = useRef(0)          // read from model on mount
-  const targetAngle = useRef(0)
+const CLOSED_ANGLE = Math.PI * 0.5   // lid flat
+const LERP_SPEED   = 0.06
 
-  // Read the lid's resting "open" angle from the model itself
+function Laptop() {
+  const { scene }  = useGLTF("/mac-draco.glb")
+  const groupRef   = useRef<THREE.Group>(null)
+  const openAngle  = useRef<number | null>(null)
+  const targetAngle = useRef(CLOSED_ANGLE)   // start closed
+  const [isOpen, setIsOpen] = useState(false)
+
+  // Capture the model's native open angle and immediately close it
   useEffect(() => {
     const screenflip = scene.getObjectByName("screenflip")
     if (screenflip) {
-      openAngle.current  = screenflip.rotation.x
-      targetAngle.current = screenflip.rotation.x
+      openAngle.current          = screenflip.rotation.x   // remember open pos
+      screenflip.rotation.x      = CLOSED_ANGLE            // snap closed instantly
+      targetAngle.current        = CLOSED_ANGLE
     }
   }, [scene])
 
-  // Toggle on click anywhere on the canvas
+  // Click anywhere → toggle
   useEffect(() => {
     const handleClick = () => {
       setIsOpen((prev) => {
         const next = !prev
-        const screenflip = scene.getObjectByName("screenflip")
-        if (screenflip) {
-          // Closed = lid flat (rotation.x ≈ 0); open = original angle
-          targetAngle.current = next ? openAngle.current : Math.PI * 0.5
-        }
+        targetAngle.current = next
+          ? (openAngle.current ?? -Math.PI * 0.425)
+          : CLOSED_ANGLE
         return next
       })
     }
     window.addEventListener("click", handleClick)
     return () => window.removeEventListener("click", handleClick)
-  }, [scene])
+  }, [])
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime()
 
-    // Float animation
+    // Gentle float
     if (groupRef.current) {
-      groupRef.current.position.y = -1.2 + Math.sin(t) * 0.12
-      groupRef.current.position.x = Math.cos(t * 0.8) * 0.08
+      groupRef.current.position.y = Math.sin(t * 0.8) * 0.1
+      groupRef.current.position.x = Math.cos(t * 0.5) * 0.06
     }
 
-    // Smooth lid close/open
+    // Smooth lid animation
     const screenflip = scene.getObjectByName("screenflip")
     if (screenflip) {
       screenflip.rotation.x = THREE.MathUtils.lerp(
         screenflip.rotation.x,
         targetAngle.current,
-        0.07,
+        LERP_SPEED,
       )
     }
   })
 
   return (
-    <group ref={groupRef}>
-      <primitive
-        object={scene}
-        scale={1.4}
-        position={[0, -1.2, 0]}
-        rotation={[0, 0, 0]}
-      />
+    <group ref={groupRef} position={[0, -0.6, 0]}>
+      <primitive object={scene} scale={0.9} rotation={[0, 0, 0]} />
     </group>
   )
 }
@@ -75,7 +72,7 @@ export default function LaptopCanvas() {
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0, 9], fov: 36 }}
+      camera={{ position: [0, 0.5, 14], fov: 42 }}
       gl={{ preserveDrawingBuffer: true }}
     >
       <directionalLight position={[2, 4, 5]}   intensity={2.5} color="#ffffff" />
