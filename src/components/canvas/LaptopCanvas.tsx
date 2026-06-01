@@ -9,7 +9,7 @@ const MODEL_Y = -2.6;
 const CLOSED_DISTANCE = 50;
 const OPENED_DISTANCE = 31;
 const LID_CLOSED = Math.PI * 0.5; //  90° — lid shut
-const LID_OPEN = -(Math.PI / 180) * 40; // -40°
+const LID_OPEN = 0; // 0° — fully flat/open
 
 function CameraZoom({ isOpen }: { isOpen: boolean }) {
   const { camera } = useThree();
