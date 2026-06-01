@@ -9,9 +9,8 @@ const CLOSED_ANGLE = Math.PI * 0.5   // lid flat
 const LERP_SPEED   = 0.06
 
 function Laptop() {
-  const { scene }  = useGLTF("/mac-draco.glb")
-  const groupRef   = useRef<THREE.Group>(null)
-  const openAngle  = useRef<number | null>(null)
+  const { scene }   = useGLTF("/mac-draco.glb")
+  const openAngle   = useRef<number | null>(null)
   const targetAngle = useRef(CLOSED_ANGLE)   // start closed
   const [isOpen, setIsOpen] = useState(false)
 
@@ -19,13 +18,13 @@ function Laptop() {
   useEffect(() => {
     const screenflip = scene.getObjectByName("screenflip")
     if (screenflip) {
-      openAngle.current          = screenflip.rotation.x   // remember open pos
-      screenflip.rotation.x      = CLOSED_ANGLE            // snap closed instantly
-      targetAngle.current        = CLOSED_ANGLE
+      openAngle.current     = screenflip.rotation.x
+      screenflip.rotation.x = CLOSED_ANGLE
+      targetAngle.current   = CLOSED_ANGLE
     }
   }, [scene])
 
-  // Click anywhere → toggle
+  // Click anywhere → toggle open / closed
   useEffect(() => {
     const handleClick = () => {
       setIsOpen((prev) => {
@@ -40,16 +39,8 @@ function Laptop() {
     return () => window.removeEventListener("click", handleClick)
   }, [])
 
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime()
-
-    // Gentle float
-    if (groupRef.current) {
-      groupRef.current.position.y = Math.sin(t * 0.8) * 0.1
-      groupRef.current.position.x = Math.cos(t * 0.5) * 0.06
-    }
-
-    // Smooth lid animation
+  // Only animate the lid — no floating
+  useFrame(() => {
     const screenflip = scene.getObjectByName("screenflip")
     if (screenflip) {
       screenflip.rotation.x = THREE.MathUtils.lerp(
@@ -61,9 +52,7 @@ function Laptop() {
   })
 
   return (
-    <group ref={groupRef} position={[0, -0.6, 0]}>
-      <primitive object={scene} scale={0.9} rotation={[0, 0, 0]} />
-    </group>
+    <primitive object={scene} scale={0.9} position={[0, -0.6, 0]} rotation={[0, 0, 0]} />
   )
 }
 
@@ -72,7 +61,7 @@ export default function LaptopCanvas() {
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.5, 14], fov: 42 }}
+      camera={{ position: [0, 0.5, 28], fov: 42 }}
       gl={{ preserveDrawingBuffer: true }}
     >
       <directionalLight position={[2, 4, 5]}   intensity={2.5} color="#ffffff" />
