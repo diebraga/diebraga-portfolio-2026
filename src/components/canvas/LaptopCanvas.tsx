@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Preload, useGLTF } from "@react-three/drei";
-import { Mac } from "../Mac";
+import { MacBook } from "../MacBook/MacBook";
 
 const CLOSED_DISTANCE = 50;
 
@@ -25,7 +25,7 @@ export default function LaptopCanvas() {
       <ambientLight intensity={0.3} />
 
       <Suspense fallback={null}>
-        <Mac />
+        <MacBook />
       </Suspense>
 
       <Preload all />

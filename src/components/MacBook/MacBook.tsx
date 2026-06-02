@@ -9,31 +9,32 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 // --- CAMERA CONFIGURATION ---
-// Lower CAMERA_Y to move down.
-// Increase CAMERA_Z to move back if the camera feels too close when you go low.
 const CAMERA_Y = 0.5;
-const CAMERA_Z = 18;
 
-export function Mac(props) {
+// --- DYNAMIC ZOOM TARGETS ---
+const ZOOMED_OUT_Z = 18; // Camera depth when laptop is closed
+const ZOOMED_IN_Z = 15; // Camera depth when laptop is open (lower = closer)
+
+// --- VERTICAL POSITION CONFIGURATION ---
+const CAMERA_LOOK_Y = 3;
+
+export function MacBook(props) {
   const { nodes, materials } = useGLTF("/mac-draco.glb") as any;
 
   const [isOpen, setIsOpen] = useState(false);
-
-  // New state to specifically control HTML visibility based on animation completion
   const [showHtml, setShowHtml] = useState(false);
 
   const lidRef = useRef<THREE.Group>(null);
   const isAnimating = useRef(false);
 
   const LID_CLOSED = 1.57;
-  const LID_OPEN = 0.014;
+  const LID_OPEN = 0.1;
 
   // 2. Handle Canvas/Window Click Events
   useEffect(() => {
     const toggle = () => {
       isAnimating.current = true;
 
-      // If we are opening, show the HTML container immediately so it can animate up
       setIsOpen((prev) => {
         if (!prev) setShowHtml(true);
         return !prev;
@@ -43,8 +44,20 @@ export function Mac(props) {
     return () => window.removeEventListener("click", toggle);
   }, []);
 
-  // 3. Smooth Animation Loop Frame Interpolation
-  useFrame(() => {
+  // 3. Smooth Animation Loop, Camera Focus, and Dynamic Zoom
+  useFrame((state) => {
+    // 1. Maintain the vertical lookAt focus anchor point
+    state.camera.lookAt(0, CAMERA_LOOK_Y, 0);
+
+    // 2. Dynamically interpolate the camera's Z position based on isOpen state
+    const targetCameraZ = isOpen ? ZOOMED_IN_Z : ZOOMED_OUT_Z;
+    state.camera.position.z = THREE.MathUtils.lerp(
+      state.camera.position.z,
+      targetCameraZ,
+      0.05, // Adjust this value to make the camera zoom faster or slower
+    );
+
+    // 3. Handle the lid hinge rotation
     if (lidRef.current) {
       const targetRotation = isOpen ? LID_OPEN : LID_CLOSED;
 
@@ -54,17 +67,14 @@ export function Mac(props) {
         0.06,
       );
 
-      // Check if the closing animation is completed
       if (isAnimating.current) {
         const distanceToTarget = Math.abs(
           lidRef.current.rotation.x - targetRotation,
         );
 
-        // Within 0.002 radians of the target resting position
         if (distanceToTarget < 0.002) {
           isAnimating.current = false;
 
-          // If the laptop target intent was closed, hide the HTML right now
           if (!isOpen) {
             setShowHtml(false);
           }
@@ -75,12 +85,10 @@ export function Mac(props) {
 
   return (
     <group {...props} dispose={null}>
-      {/* STATIC SCENE CAMERA 
-          Tied directly to the configuration variables at the top of the file.
-      */}
+      {/* Starting position setup uses our initial default closed depth */}
       <PerspectiveCamera
         makeDefault
-        position={[0, CAMERA_Y, CAMERA_Z]}
+        position={[0, CAMERA_Y, ZOOMED_OUT_Z]}
         fov={45}
       />
 
@@ -110,7 +118,6 @@ export function Mac(props) {
             style={{
               width: "100%",
               height: "100%",
-              // Uses our checked state variable to vanish safely without breaking layout scales
               display: showHtml ? "block" : "none",
             }}
           >
