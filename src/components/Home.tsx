@@ -41,7 +41,7 @@ export default function Home() {
         {isMobile ? (
           <IPhoneCanvas onTransitionComplete={() => setShowHtmlPage(true)} />
         ) : (
-          <LaptopCanvas />
+          <LaptopCanvas nonTransitionComplete={() => setShowHtmlPage(true)} />
         )}
       </div>
 
@@ -67,13 +67,6 @@ export default function Home() {
             outside of WebGL. You can put standard text, React components,
             Tailwind grids, or scroll setups inside this div.
           </p>
-
-          <button
-            onClick={() => setShowHtmlPage(false)}
-            className="mt-4 px-6 py-3 bg-[#007aff] hover:bg-[#0051a8] text-white font-medium rounded-full transition-colors"
-          >
-            Go Back to Model
-          </button>
         </div>
       </div>
     </div>
