@@ -35,6 +35,7 @@ export function IPhone(
     window.addEventListener("click", toggle);
     return () => window.removeEventListener("click", toggle);
   }, [toggle]);
+
   useFrame((state) => {
     if (groupRef.current) {
       // AUTOMATED ROTATION DIRECTION:
@@ -53,6 +54,15 @@ export function IPhone(
       groupRef.current.rotation.y = THREE.MathUtils.lerp(
         groupRef.current.rotation.y,
         targetRotationY,
+        0.05,
+      );
+
+      // ADDED: Minimal subtle float that returns to 0 when opened
+      const t = state.clock.getElapsedTime();
+      const targetY = isOpen ? 0 : Math.sin(t * 1.0) * 0.02;
+      groupRef.current.position.y = THREE.MathUtils.lerp(
+        groupRef.current.position.y,
+        targetY,
         0.05,
       );
     }
