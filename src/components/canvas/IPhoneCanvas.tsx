@@ -6,8 +6,8 @@ import { Preload, Loader } from "@react-three/drei";
 import * as THREE from "three";
 import { IPhone } from "../IPhone/IPhone";
 
-const CLOSED_DISTANCE = 2;
-const OPENED_DISTANCE = 2;
+export const CLOSED_DISTANCE = -2;
+export const OPENED_DISTANCE = -0.5;
 
 export function CameraZoom({ isOpen }: { isOpen: boolean }) {
   useFrame((state) => {
@@ -21,7 +21,11 @@ export function CameraZoom({ isOpen }: { isOpen: boolean }) {
   return null;
 }
 
-export default function IPhoneCanvas() {
+export default function IPhoneCanvas({
+  onTransitionComplete,
+}: {
+  onTransitionComplete: () => void;
+}) {
   return (
     <>
       <Canvas
@@ -48,7 +52,7 @@ export default function IPhoneCanvas() {
         <ambientLight intensity={0.3} />
 
         <Suspense fallback={null}>
-          <IPhone />
+          <IPhone onTransitionComplete={onTransitionComplete} />
         </Suspense>
 
         <Preload all />

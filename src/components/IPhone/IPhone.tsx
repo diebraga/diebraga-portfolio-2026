@@ -11,70 +11,20 @@ import React, { useRef, useState, useEffect, useCallback, JSX } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { CameraZoom } from "../canvas/IPhoneCanvas";
+import {
+  CameraZoom,
+  CLOSED_DISTANCE,
+  OPENED_DISTANCE,
+} from "../canvas/IPhoneCanvas";
 
 type GLTFResult = {
-  nodes: {
-    Object_4: THREE.Mesh;
-    Object_5: THREE.Mesh;
-    Object_6: THREE.Mesh;
-    Object_7: THREE.Mesh;
-    Object_8: THREE.Mesh;
-    Object_9: THREE.Mesh;
-    Object_10: THREE.Mesh;
-    Object_12: THREE.Mesh;
-    Object_13: THREE.Mesh;
-    Object_14: THREE.Mesh;
-    Object_16: THREE.Mesh;
-    Object_17: THREE.Mesh;
-    Object_18: THREE.Mesh;
-    Object_20: THREE.Mesh;
-    Object_21: THREE.Mesh;
-    Object_23: THREE.Mesh;
-    Object_24: THREE.Mesh;
-    Object_26: THREE.Mesh;
-    Object_27: THREE.Mesh;
-    Object_28: THREE.Mesh;
-    Object_30: THREE.Mesh;
-    Object_32: THREE.Mesh;
-    Object_33: THREE.Mesh;
-    Object_35: THREE.Mesh;
-    Object_36: THREE.Mesh;
-    Object_37: THREE.Mesh;
-    Object_39: THREE.Mesh;
-    Object_41: THREE.Mesh;
-    Object_42: THREE.Mesh;
-    Object_44: THREE.Mesh;
-    Object_45: THREE.Mesh;
-    Object_47: THREE.Mesh;
-    Object_49: THREE.Mesh;
-    Object_51: THREE.Mesh;
-    Object_53: THREE.Mesh;
-    Object_54: THREE.Mesh;
-    Object_55: THREE.Mesh;
-    Object_57: THREE.Mesh;
-    Object_59: THREE.Mesh;
-  };
-  materials: {
-    Aluminum: THREE.Material;
-    Plastic_antena: THREE.Material;
-    Plastic_USB_port: THREE.Material;
-    Camera_filter: THREE.Material;
-    material: THREE.Material;
-    Tint_back_glass: THREE.Material;
-    Metal_Screw: THREE.Material;
-    Frosted_glass: THREE.Material;
-    Glass: THREE.Material;
-    Lens: THREE.Material;
-    Sapphire_miror: THREE.Material;
-    Mirror_filter: THREE.Material;
-    Frame: THREE.Material;
-    Plastic_LED: THREE.Material;
-    Display: THREE.Material;
-  };
+  nodes: { [key: string]: THREE.Mesh };
+  materials: { [key: string]: THREE.Material };
 };
 
-export function IPhone(props: JSX.IntrinsicElements["group"]) {
+export function IPhone(
+  props: JSX.IntrinsicElements["group"] & { onTransitionComplete: () => void },
+) {
   const { nodes, materials } = useGLTF("/iphone.glb") as unknown as GLTFResult;
 
   const groupRef = useRef<THREE.Group>(null);
@@ -85,19 +35,39 @@ export function IPhone(props: JSX.IntrinsicElements["group"]) {
     window.addEventListener("click", toggle);
     return () => window.removeEventListener("click", toggle);
   }, [toggle]);
-
-  useFrame(() => {
+  useFrame((state) => {
     if (groupRef.current) {
-      // The vertical position logic is completely gone. The phone stays locked at Y = 0.
+      // AUTOMATED ROTATION DIRECTION:
+      // It checks if your closed distance is a negative number.
+      // If it's negative, it uses the inverted rotation. If positive, it uses standard rotation.
+      const isCameraBehind = CLOSED_DISTANCE < 0;
 
-      // Kept the rotation transition: flips from back (Math.PI) to front (0)
-      const targetRotationY = isOpen ? 0 : Math.PI;
+      const targetRotationY = isOpen
+        ? isCameraBehind
+          ? Math.PI
+          : 0
+        : isCameraBehind
+          ? 0
+          : Math.PI;
 
       groupRef.current.rotation.y = THREE.MathUtils.lerp(
         groupRef.current.rotation.y,
         targetRotationY,
         0.05,
       );
+    }
+
+    // Dynamic distance math handles the rest automatically
+    const targetZ = isOpen ? OPENED_DISTANCE : CLOSED_DISTANCE;
+    state.camera.position.z = THREE.MathUtils.lerp(
+      state.camera.position.z,
+      targetZ,
+      0.05,
+    );
+    state.camera.lookAt(0, 0, 0);
+
+    if (isOpen && Math.abs(state.camera.position.z - targetZ) < 0.05) {
+      props.onTransitionComplete();
     }
   });
 
