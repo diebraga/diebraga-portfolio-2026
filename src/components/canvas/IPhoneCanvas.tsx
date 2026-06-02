@@ -6,8 +6,8 @@ import { Preload, Loader } from "@react-three/drei";
 import * as THREE from "three";
 import { IPhone } from "../IPhone/IPhone";
 
-const CLOSED_DISTANCE = 10;
-const OPENED_DISTANCE = 8;
+const CLOSED_DISTANCE = 2;
+const OPENED_DISTANCE = 2;
 
 export function CameraZoom({ isOpen }: { isOpen: boolean }) {
   useFrame((state) => {
