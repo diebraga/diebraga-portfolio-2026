@@ -1,66 +1,24 @@
 "use client";
 
-import { Suspense, useRef, useState, useEffect, useCallback } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Preload, useGLTF, Loader } from "@react-three/drei";
+import { Suspense } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Preload, Loader } from "@react-three/drei";
 import * as THREE from "three";
+import { IPhone } from "../IPhone/IPhone";
 
-const MODEL_Y = -2.6;
-const CLOSED_DISTANCE = 50;
-const OPENED_DISTANCE = 31;
+const CLOSED_DISTANCE = 10;
+const OPENED_DISTANCE = 8;
 
-function CameraZoom({ isOpen }: { isOpen: boolean }) {
-  const { camera } = useThree();
-  useFrame(() => {
-    camera.position.z = THREE.MathUtils.lerp(
-      camera.position.z,
+export function CameraZoom({ isOpen }: { isOpen: boolean }) {
+  useFrame((state) => {
+    state.camera.position.z = THREE.MathUtils.lerp(
+      state.camera.position.z,
       isOpen ? OPENED_DISTANCE : CLOSED_DISTANCE,
       0.05,
     );
   });
+
   return null;
-}
-
-function Phone() {
-  const { scene } = useGLTF("/models/iphone-17-pro.glb");
-  const groupRef = useRef<THREE.Group>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const toggle = useCallback(() => setIsOpen((p) => !p), []);
-
-  useEffect(() => {
-    window.addEventListener("click", toggle);
-    return () => window.removeEventListener("click", toggle);
-  }, [toggle]);
-
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
-
-    if (groupRef.current) {
-      groupRef.current.position.y = isOpen
-        ? THREE.MathUtils.lerp(groupRef.current.position.y, 0, 0.05)
-        : Math.sin(t * 0.8) * 0.12;
-
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(
-        groupRef.current.rotation.y,
-        isOpen ? Math.PI : 0,
-        0.05,
-      );
-    }
-  });
-
-  return (
-    <>
-      <CameraZoom isOpen={isOpen} />
-      <group ref={groupRef}>
-        <primitive
-          object={scene}
-          scale={0.9}
-          position={[0, MODEL_Y, 0]}
-          rotation={[0, 0, 0]}
-        />
-      </group>
-    </>
-  );
 }
 
 export default function IPhoneCanvas() {
@@ -90,11 +48,12 @@ export default function IPhoneCanvas() {
         <ambientLight intensity={0.3} />
 
         <Suspense fallback={null}>
-          <Phone />
+          <IPhone />
         </Suspense>
 
         <Preload all />
       </Canvas>
+
       <Loader
         containerStyles={{ background: "#121212" }}
         innerStyles={{ background: "#333" }}
@@ -105,5 +64,3 @@ export default function IPhoneCanvas() {
     </>
   );
 }
-
-useGLTF.preload("/models/iphone-17-pro.glb");
