@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import { TypewriterOverlay } from "./TypewriterOverlay/TypewriterOverlay";
 import HeroPage from "./HeroPage";
 import MainContent from "./MainContent";
+import Navbar from "./sections/Navbar";
 import { useAudio } from "@/context/AudioContext";
 
 const LaptopCanvas = dynamic(() => import("./canvas/LaptopCanvas"), { ssr: false });
@@ -87,15 +88,20 @@ export default function Home() {
 
       {/* ── Phase: portfolio (hero + content, fully scrollable) ───────── */}
       {phase === "portfolio" && (
-        <div className="absolute inset-0 z-10 overflow-y-auto">
-          {/* Hero — full-screen video section */}
-          <HeroPage onViewPortfolio={handleViewPortfolio} />
+        <>
+          {/* Navbar lives OUTSIDE the scroll container — true root stacking context */}
+          <Navbar />
 
-          {/* Main content — scrolled into naturally or via button */}
-          <div id="portfolio-content">
-            <MainContent />
+          <div className="absolute inset-0 z-10 overflow-y-auto">
+            {/* Hero — full-screen video section */}
+            <HeroPage onViewPortfolio={handleViewPortfolio} />
+
+            {/* Main content — scrolled into naturally or via button */}
+            <div id="portfolio-content">
+              <MainContent />
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { IoArrowForward } from "react-icons/io5";
 import { Button } from "@/components/ui/button";
-import Navbar from "./sections/Navbar";
 import About from "./sections/About";
 import Experience from "./sections/Experience";
 import Works from "./sections/Works";
@@ -16,8 +15,6 @@ export default function MainContent() {
 
   return (
     <div className="relative z-0" style={{ backgroundColor: "#0b0013" }}>
-      <Navbar />
-
       <About />
       <Experience />
       <Works />

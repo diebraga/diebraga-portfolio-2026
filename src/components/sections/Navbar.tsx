@@ -49,11 +49,10 @@ const Navbar = () => {
         if (best) setActive(best);
       },
       {
-        // Fire at multiple thresholds for smoother tracking
-        threshold: [0, 0.1, 0.25, 0.5, 0.75, 1],
-        // Shrink the root margin so a section registers as "active"
-        // only when it's meaningfully in view
-        rootMargin: "-20% 0px -60% 0px",
+        threshold: [0, 0.05, 0.1, 0.2, 0.3, 0.5],
+        // Top edge: just below the navbar (~80px). Bottom: cut off lower half.
+        // A section becomes "active" when its top enters the upper 50% of the viewport.
+        rootMargin: "-80px 0px -45% 0px",
       }
     );
 
