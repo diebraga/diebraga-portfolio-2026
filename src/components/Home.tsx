@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState, useCallback } from "react";
 import { TypewriterOverlay } from "./TypewriterOverlay/TypewriterOverlay";
+import { Hero } from "./Hero";
 
 const LaptopCanvas = dynamic(() => import("./canvas/LaptopCanvas"), {
   ssr: false,
@@ -100,16 +101,7 @@ export default function Home() {
             : "opacity-0 pointer-events-none"
         }`}
       >
-        <div className="max-w-3xl w-full mx-auto space-y-6">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#007aff]">
-            Welcome to the Full Site
-          </h1>
-          <p className="text-lg text-gray-400 leading-relaxed">
-            This is your regular, production-ready HTML page running perfectly
-            outside of WebGL. You can put standard text, React components,
-            Tailwind grids, or scroll setups inside this div.
-          </p>
-        </div>
+        <Hero />
       </div>
     </div>
   );
