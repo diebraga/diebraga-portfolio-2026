@@ -1,108 +1,124 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { TypewriterOverlay } from "./TypewriterOverlay/TypewriterOverlay";
-import { Hero } from "./Hero";
+import HeroPage from "./HeroPage";
 
-const LaptopCanvas = dynamic(() => import("./canvas/LaptopCanvas"), {
-  ssr: false,
-});
+const LaptopCanvas = dynamic(() => import("./canvas/LaptopCanvas"), { ssr: false });
+const IPhoneCanvas = dynamic(() => import("./canvas/IPhoneCanvas"), { ssr: false });
 
-const IPhoneCanvas = dynamic(() => import("./canvas/IPhoneCanvas"), {
-  ssr: false,
-});
-
-// --- MAIN HOME COMPONENT ---
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.matchMedia("(max-width: 768px)").matches;
-    }
-    return false;
-  });
-
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(max-width: 768px)").matches
+      : false
+  );
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
-
   return isMobile;
 }
 
+// Phases on the home page:
+// 'intro'      → 3D typewriter + MacBook/iPhone canvas
+// 'hero'       → standalone video hero page
+// 'expanding'  → circle portal covers screen before navigation
+type Phase = "intro" | "hero" | "expanding";
+
 export default function Home() {
+  const router = useRouter();
   const isMobile = useIsMobile();
-  const [showHtmlPage, setShowHtmlPage] = useState(false);
+  const soundRef = useRef<HTMLAudioElement>(null);
+
+  const [phase, setPhase] = useState<Phase>("intro");
+
   const [isReadyToClick, setIsReadyToClick] = useState(false);
   const [hasPlayedTransition, setHasPlayedTransition] = useState(false);
 
-  const handleInteraction = useCallback(() => {
-    if (!isReadyToClick || hasPlayedTransition) return;
+  // Start ambient music as soon as the hero page appears
+  const startAmbientSound = useCallback(() => {
+    if (!soundRef.current) return;
+    soundRef.current.volume = 0.6;
+    soundRef.current.play().catch(() => {});
+  }, []);
 
+  // Called by MacBook / IPhone when their zoom-in animation completes
+  const handleIntroComplete = useCallback(() => {
+    setPhase("hero");
+    startAmbientSound();
+  }, [startAmbientSound]);
+
+  // 3-D intro click handler (plays the one-shot transition sound)
+  const handleIntroClick = useCallback(() => {
+    if (!isReadyToClick || hasPlayedTransition) return;
     const audio = new Audio("/transition.mp3");
     audio.volume = 0.45;
     audio.currentTime = 1.0;
-
-    audio
-      .play()
-      .then(() => {
-        setHasPlayedTransition(true);
-      })
-      .catch((err) => {
-        console.warn("Audio element blocked by browser autoplay rules:", err);
-        setHasPlayedTransition(true);
-      });
+    audio.play()
+      .then(() => setHasPlayedTransition(true))
+      .catch(() => setHasPlayedTransition(true));
   }, [isReadyToClick, hasPlayedTransition]);
+
+  // "View Portfolio" clicked → expand portal, then navigate
+  const handleViewPortfolio = useCallback(() => {
+    soundRef.current?.pause();
+    setPhase("expanding");
+  }, []);
+
+  // Portal fully covers screen → push to /portfolio
+  const onExpandEnd = useCallback(() => {
+    router.push("/portfolio");
+  }, [router]);
 
   return (
     <div className="relative w-full h-screen bg-[#050816] overflow-hidden">
-      {/* 1. PHYSICAL CLICK LOCK SHIELD 
-          This blocks absolutely everything until typing finishes.
-          It intercepts mouse events at z-40 so WebGL never receives them.
-      */}
-      {!isReadyToClick && (
+      {/* Ambient audio (starts when hero phase begins) */}
+      <audio ref={soundRef} src="/space.mp3" loop />
+
+      {/* ── Phase: intro ─────────────────────────────────────────────── */}
+      {phase === "intro" && (
+        <>
+          {!isReadyToClick && (
+            <div
+              className="absolute inset-0 z-40 bg-transparent cursor-default pointer-events-auto"
+              onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            />
+          )}
+          {!hasPlayedTransition && (
+            <TypewriterOverlay onComplete={() => setIsReadyToClick(true)} />
+          )}
+          <div
+            className={`absolute inset-0 z-10 ${isReadyToClick && !hasPlayedTransition ? "cursor-pointer" : "cursor-default"}`}
+            onClick={handleIntroClick}
+          >
+            {isMobile
+              ? <IPhoneCanvas onTransitionComplete={handleIntroComplete} />
+              : <LaptopCanvas nonTransitionComplete={handleIntroComplete} />
+            }
+          </div>
+        </>
+      )}
+
+      {/* ── Phase: hero ──────────────────────────────────────────────── */}
+      {(phase === "hero" || phase === "expanding") && (
+        <div className="absolute inset-0 z-10">
+          <HeroPage onViewPortfolio={handleViewPortfolio} />
+        </div>
+      )}
+
+      {/* ── Portal expand overlay (navigates when done) ───────────────── */}
+      {phase === "expanding" && (
         <div
-          className="absolute inset-0 z-40 bg-transparent cursor-default pointer-events-auto"
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-          }}
+          className="absolute inset-0 z-30 bg-[#0b0013]"
+          style={{ animation: "circleExpand 0.55s cubic-bezier(0.76,0,0.24,1) forwards" }}
+          onAnimationEnd={onExpandEnd}
         />
       )}
-
-      {/* 2. Terminal Overlay Layer */}
-      {!hasPlayedTransition && (
-        <TypewriterOverlay onComplete={() => setIsReadyToClick(true)} />
-      )}
-
-      {/* 3. 3D WebGL Canvas Layer */}
-      <div
-        className={`absolute inset-0 z-10 transition-all duration-500 ${
-          isReadyToClick && !hasPlayedTransition
-            ? "cursor-pointer opacity-100"
-            : "cursor-default"
-        }`}
-        onClick={handleInteraction}
-      >
-        {isMobile ? (
-          <IPhoneCanvas onTransitionComplete={() => setShowHtmlPage(true)} />
-        ) : (
-          <LaptopCanvas nonTransitionComplete={() => setShowHtmlPage(true)} />
-        )}
-      </div>
-
-      {/* 4. Modern Full-Site Page HTML Overlay */}
-      <div
-        className={`absolute inset-0 z-20 flex flex-col items-center justify-start bg-[#111111] text-white overflow-y-auto px-6 py-20 transition-opacity duration-700 ease-in-out ${
-          showHtmlPage
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
-      >
-        <Hero />
-      </div>
     </div>
   );
 }

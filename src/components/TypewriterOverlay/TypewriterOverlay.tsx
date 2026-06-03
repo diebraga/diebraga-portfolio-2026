@@ -16,16 +16,8 @@ export function TypewriterOverlay({ onComplete }: { onComplete: () => void }) {
     let currentLine1 = "";
     let currentLine2 = "";
 
-    const playTypewriterSound = () => {
-      const audio = new Audio("/typewriter.mp3");
-      audio.volume = 0.25; // Keep it clean and atmospheric, not deafening
-      audio.currentTime = 0; // Reset tracking pointer for quick successive triggers
-
-      audio.play().catch((err) => {
-        // Silently handles browser autoplay block policy without killing the animation script
-        console.debug("Audio play deferred until user gesture:", err.message);
-      });
-    };
+    // Typewriter sound intentionally disabled — no suitable per-character audio asset
+    const playTypewriterSound = () => {};
 
     // Step 1: Type out Line 1
     const timer1 = setInterval(() => {
