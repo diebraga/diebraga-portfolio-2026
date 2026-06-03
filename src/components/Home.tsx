@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState, useCallback } from "react";
+import { TypewriterOverlay } from "./TypewriterOverlay/TypewriterOverlay";
 
 const LaptopCanvas = dynamic(() => import("./canvas/LaptopCanvas"), {
   ssr: false,
@@ -11,6 +12,7 @@ const IPhoneCanvas = dynamic(() => import("./canvas/IPhoneCanvas"), {
   ssr: false,
 });
 
+// --- MAIN HOME COMPONENT ---
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== "undefined") {
@@ -32,17 +34,15 @@ function useIsMobile() {
 export default function Home() {
   const isMobile = useIsMobile();
   const [showHtmlPage, setShowHtmlPage] = useState(false);
+  const [isReadyToClick, setIsReadyToClick] = useState(false);
   const [hasPlayedTransition, setHasPlayedTransition] = useState(false);
 
-  // Sound generator with custom start time
-  const playTransitionSound = useCallback(() => {
-    if (hasPlayedTransition) return;
+  const handleInteraction = useCallback(() => {
+    if (!isReadyToClick || hasPlayedTransition) return;
 
     const audio = new Audio("/transition.mp3");
     audio.volume = 0.45;
-
-    const startSecond = 1;
-    audio.currentTime = startSecond;
+    audio.currentTime = 1.0;
 
     audio
       .play()
@@ -51,15 +51,39 @@ export default function Home() {
       })
       .catch((err) => {
         console.warn("Audio element blocked by browser autoplay rules:", err);
+        setHasPlayedTransition(true);
       });
-  }, [hasPlayedTransition]);
+  }, [isReadyToClick, hasPlayedTransition]);
 
   return (
     <div className="relative w-full h-screen bg-[#050816] overflow-hidden">
-      {/* 3D Canvas Viewport Layer */}
+      {/* 1. PHYSICAL CLICK LOCK SHIELD 
+          This blocks absolutely everything until typing finishes.
+          It intercepts mouse events at z-40 so WebGL never receives them.
+      */}
+      {!isReadyToClick && (
+        <div
+          className="absolute inset-0 z-40 bg-transparent cursor-default pointer-events-auto"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        />
+      )}
+
+      {/* 2. Terminal Overlay Layer */}
+      {!hasPlayedTransition && (
+        <TypewriterOverlay onComplete={() => setIsReadyToClick(true)} />
+      )}
+
+      {/* 3. 3D WebGL Canvas Layer */}
       <div
-        className="absolute inset-0 z-10 cursor-pointer"
-        onClick={playTransitionSound}
+        className={`absolute inset-0 z-10 transition-all duration-500 ${
+          isReadyToClick && !hasPlayedTransition
+            ? "cursor-pointer opacity-100"
+            : "cursor-default"
+        }`}
+        onClick={handleInteraction}
       >
         {isMobile ? (
           <IPhoneCanvas onTransitionComplete={() => setShowHtmlPage(true)} />
@@ -68,7 +92,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* Modern, Seamless HTML Page Overlay */}
+      {/* 4. Modern Full-Site Page HTML Overlay */}
       <div
         className={`absolute inset-0 z-20 flex flex-col items-center justify-start bg-[#111111] text-white overflow-y-auto px-6 py-20 transition-opacity duration-700 ease-in-out ${
           showHtmlPage
