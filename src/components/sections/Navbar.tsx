@@ -18,9 +18,10 @@ const Navbar = () => {
 
   // Opacity on scroll
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 100);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handleScroll = (e: Event) =>
+      setScrolled((e as CustomEvent).detail.scrollTop > 100);
+    window.addEventListener("portfolio-scroll", handleScroll);
+    return () => window.removeEventListener("portfolio-scroll", handleScroll);
   }, []);
 
   // IntersectionObserver — whichever section is most visible wins

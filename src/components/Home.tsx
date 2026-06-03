@@ -92,7 +92,16 @@ export default function Home() {
           {/* Navbar lives OUTSIDE the scroll container — true root stacking context */}
           <Navbar />
 
-          <div className="absolute inset-0 z-10 overflow-y-auto">
+          <div
+            className="absolute inset-0 z-10 overflow-y-auto"
+            onScroll={(e) =>
+              window.dispatchEvent(
+                new CustomEvent("portfolio-scroll", {
+                  detail: { scrollTop: (e.target as HTMLElement).scrollTop },
+                })
+              )
+            }
+          >
             {/* Hero — full-screen video section */}
             <HeroPage onViewPortfolio={handleViewPortfolio} />
 
