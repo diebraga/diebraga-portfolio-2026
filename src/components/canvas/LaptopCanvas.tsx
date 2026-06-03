@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect, useCallback } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Preload, useGLTF, Loader } from "@react-three/drei";
 import { MacBook } from "../MacBook/MacBook";
+import StarField from "./StarField";
 
 // Config panel for your Laptop camera distances
 export const CLOSED_DISTANCE = 20;
@@ -50,7 +51,7 @@ export default function LaptopCanvas({
         <ambientLight intensity={0.3} />
 
         <Suspense fallback={null}>
-          {/* Passed down variables to handle the animations and triggers */}
+          <StarField count={4000} radius={16} size={0.06} />
           <MacBook
             isOpen={isOpen}
             onTransitionComplete={nonTransitionComplete}

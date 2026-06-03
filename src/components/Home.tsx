@@ -1,10 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
 import { TypewriterOverlay } from "./TypewriterOverlay/TypewriterOverlay";
 import HeroPage from "./HeroPage";
+import MainContent from "./MainContent";
+import { useAudio } from "@/context/AudioContext";
 
 const LaptopCanvas = dynamic(() => import("./canvas/LaptopCanvas"), { ssr: false });
 const IPhoneCanvas = dynamic(() => import("./canvas/IPhoneCanvas"), { ssr: false });
@@ -24,36 +25,23 @@ function useIsMobile() {
   return isMobile;
 }
 
-// Phases on the home page:
-// 'intro'      → 3D typewriter + MacBook/iPhone canvas
-// 'hero'       → standalone video hero page
-// 'expanding'  → circle portal covers screen before navigation
-type Phase = "intro" | "hero" | "expanding";
+type Phase = "intro" | "portfolio";
 
 export default function Home() {
-  const router = useRouter();
   const isMobile = useIsMobile();
-  const soundRef = useRef<HTMLAudioElement>(null);
+  const { start } = useAudio();
 
   const [phase, setPhase] = useState<Phase>("intro");
-
   const [isReadyToClick, setIsReadyToClick] = useState(false);
   const [hasPlayedTransition, setHasPlayedTransition] = useState(false);
 
-  // Start ambient music as soon as the hero page appears
-  const startAmbientSound = useCallback(() => {
-    if (!soundRef.current) return;
-    soundRef.current.volume = 0.6;
-    soundRef.current.play().catch(() => {});
-  }, []);
-
-  // Called by MacBook / IPhone when their zoom-in animation completes
+  // MacBook / IPhone zoom-in complete → show portfolio
   const handleIntroComplete = useCallback(() => {
-    setPhase("hero");
-    startAmbientSound();
-  }, [startAmbientSound]);
+    setPhase("portfolio");
+    start();
+  }, [start]);
 
-  // 3-D intro click handler (plays the one-shot transition sound)
+  // 3-D intro click (one-shot transition sound)
   const handleIntroClick = useCallback(() => {
     if (!isReadyToClick || hasPlayedTransition) return;
     const audio = new Audio("/transition.mp3");
@@ -64,23 +52,16 @@ export default function Home() {
       .catch(() => setHasPlayedTransition(true));
   }, [isReadyToClick, hasPlayedTransition]);
 
-  // "View Portfolio" clicked → expand portal, then navigate
+  // "View Portfolio" button → smooth-scroll to the content below the hero
   const handleViewPortfolio = useCallback(() => {
-    soundRef.current?.pause();
-    setPhase("expanding");
+    const el = document.getElementById("portfolio-content");
+    el?.scrollIntoView({ behavior: "smooth" });
   }, []);
-
-  // Portal fully covers screen → push to /portfolio
-  const onExpandEnd = useCallback(() => {
-    router.push("/portfolio");
-  }, [router]);
 
   return (
     <div className="relative w-full h-screen bg-[#050816] overflow-hidden">
-      {/* Ambient audio (starts when hero phase begins) */}
-      <audio ref={soundRef} src="/space.mp3" loop />
 
-      {/* ── Phase: intro ─────────────────────────────────────────────── */}
+      {/* ── Phase: intro (3D canvas) ──────────────────────────────────── */}
       {phase === "intro" && (
         <>
           {!isReadyToClick && (
@@ -104,20 +85,17 @@ export default function Home() {
         </>
       )}
 
-      {/* ── Phase: hero ──────────────────────────────────────────────── */}
-      {(phase === "hero" || phase === "expanding") && (
-        <div className="absolute inset-0 z-10">
+      {/* ── Phase: portfolio (hero + content, fully scrollable) ───────── */}
+      {phase === "portfolio" && (
+        <div className="absolute inset-0 z-10 overflow-y-auto">
+          {/* Hero — full-screen video section */}
           <HeroPage onViewPortfolio={handleViewPortfolio} />
-        </div>
-      )}
 
-      {/* ── Portal expand overlay (navigates when done) ───────────────── */}
-      {phase === "expanding" && (
-        <div
-          className="absolute inset-0 z-30 bg-[#0b0013]"
-          style={{ animation: "circleExpand 0.55s cubic-bezier(0.76,0,0.24,1) forwards" }}
-          onAnimationEnd={onExpandEnd}
-        />
+          {/* Main content — scrolled into naturally or via button */}
+          <div id="portfolio-content">
+            <MainContent />
+          </div>
+        </div>
       )}
     </div>
   );

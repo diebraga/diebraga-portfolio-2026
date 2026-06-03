@@ -5,6 +5,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Preload, Loader } from "@react-three/drei";
 import * as THREE from "three";
 import { IPhone } from "../IPhone/IPhone";
+import StarField from "./StarField";
 
 export const CLOSED_DISTANCE = -2;
 export const OPENED_DISTANCE = -0.5;
@@ -52,6 +53,7 @@ export default function IPhoneCanvas({
         <ambientLight intensity={0.3} />
 
         <Suspense fallback={null}>
+          <StarField count={4000} radius={16} size={0.06} />
           <IPhone onTransitionComplete={onTransitionComplete} />
         </Suspense>
 

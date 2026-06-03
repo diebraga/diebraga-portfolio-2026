@@ -1,47 +1,101 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { navLinks } from "../../constants";
 
+// All section ids in order (hero first)
+const allSections = [
+  { id: "hero", title: "Hero" },
+  ...navLinks.map((n) => ({ id: n.id, title: n.title })),
+];
+
 const Navbar = () => {
-  const [active, setActive] = useState("");
+  const [active, setActive] = useState("Hero");
   const [toggle, setToggle] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // Prevent observer from overriding an in-flight programmatic scroll
+  const isScrollingRef = useRef(false);
 
+  // Opacity on scroll
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 100);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // IntersectionObserver — whichever section is most visible wins
+  useEffect(() => {
+    const ratios: Record<string, number> = {};
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isScrollingRef.current) return;
+
+        entries.forEach((entry) => {
+          ratios[entry.target.id] = entry.intersectionRatio;
+        });
+
+        // Pick the section with the highest visible ratio
+        let best = "";
+        let bestRatio = -1;
+        allSections.forEach(({ id, title }) => {
+          const r = ratios[id] ?? 0;
+          if (r > bestRatio) {
+            bestRatio = r;
+            best = title;
+          }
+        });
+
+        if (best) setActive(best);
+      },
+      {
+        // Fire at multiple thresholds for smoother tracking
+        threshold: [0, 0.1, 0.25, 0.5, 0.75, 1],
+        // Shrink the root margin so a section registers as "active"
+        // only when it's meaningfully in view
+        rootMargin: "-20% 0px -60% 0px",
+      }
+    );
+
+    allSections.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollTo = useCallback((id: string, title: string) => {
+    setActive(title);
+    setToggle(false);
+
+    // Lock observer briefly so it doesn't fight the programmatic scroll
+    isScrollingRef.current = true;
+    setTimeout(() => { isScrollingRef.current = false; }, 1000);
+
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
   return (
     <nav
-      className={`sm:px-16 px-6 w-full flex items-center py-5 fixed top-0 z-20 ${
-        scrolled ? "bg-[#0b0013]/90 backdrop-blur-sm" : "bg-transparent"
+      className={`sm:px-16 px-6 w-full flex items-center py-5 fixed top-0 z-20 backdrop-blur-sm transition-colors duration-300 ${
+        scrolled ? "bg-[#0b0013]/90" : "bg-[#0b0013]/40"
       }`}
     >
-      <div className="w-full flex justify-between items-center max-w-7xl mx-auto">
-        {/* Hero / home link on the left */}
-        <Link
-          href="/"
-          className="text-[#aaa6c3] hover:text-white text-[18px] font-medium transition-colors"
-          onClick={() => setActive("")}
-        >
-          ← Hero
-        </Link>
+      <div className="w-full flex justify-end items-center max-w-7xl mx-auto">
 
-        {/* Section links on the right — desktop */}
+        {/* Section links — desktop */}
         <ul className="list-none hidden sm:flex flex-row gap-10">
-          {navLinks.map((nav) => (
+          {allSections.map(({ id, title }) => (
             <li
-              key={nav.id}
+              key={id}
               className={`${
-                active === nav.title ? "text-white" : "text-[#aaa6c3]"
-              } hover:text-white text-[18px] font-medium cursor-pointer`}
-              onClick={() => setActive(nav.title)}
+                active === title ? "text-white" : "text-[#aaa6c3]"
+              } hover:text-white text-[18px] font-medium cursor-pointer transition-colors duration-200`}
+              onClick={() => scrollTo(id, title)}
             >
-              <a href={`#${nav.id}`}>{nav.title}</a>
+              {title}
             </li>
           ))}
         </ul>
@@ -53,9 +107,9 @@ const Navbar = () => {
             onClick={() => setToggle(!toggle)}
             aria-label="Toggle menu"
           >
-            <span className={`block h-0.5 bg-white transition-all ${toggle ? "rotate-45 translate-y-2" : ""}`} />
-            <span className={`block h-0.5 bg-white transition-all ${toggle ? "opacity-0" : ""}`} />
-            <span className={`block h-0.5 bg-white transition-all ${toggle ? "-rotate-45 -translate-y-2" : ""}`} />
+            <span className={`block h-0.5 bg-white transition-all duration-300 ${toggle ? "rotate-45 translate-y-2" : ""}`} />
+            <span className={`block h-0.5 bg-white transition-all duration-300 ${toggle ? "opacity-0" : ""}`} />
+            <span className={`block h-0.5 bg-white transition-all duration-300 ${toggle ? "-rotate-45 -translate-y-2" : ""}`} />
           </button>
 
           <div
@@ -64,24 +118,15 @@ const Navbar = () => {
             } p-6 bg-gradient-to-b from-[#0b0013] to-[#1a0030] absolute top-20 right-0 mx-4 my-2 min-w-[160px] z-10 rounded-xl border border-purple-800/40`}
           >
             <ul className="list-none flex justify-end items-start flex-1 flex-col gap-4">
-              {/* Hero back-link in mobile menu */}
-              <li className="font-medium text-[16px] text-[#aaa6c3]">
-                <Link href="/" onClick={() => setToggle(false)}>
-                  ← Hero
-                </Link>
-              </li>
-              {navLinks.map((nav) => (
+              {allSections.map(({ id, title }) => (
                 <li
-                  key={nav.id}
-                  className={`font-medium cursor-pointer text-[16px] ${
-                    active === nav.title ? "text-white" : "text-[#aaa6c3]"
+                  key={id}
+                  className={`font-medium cursor-pointer text-[16px] transition-colors duration-200 ${
+                    active === title ? "text-white" : "text-[#aaa6c3]"
                   }`}
-                  onClick={() => {
-                    setToggle(false);
-                    setActive(nav.title);
-                  }}
+                  onClick={() => scrollTo(id, title)}
                 >
-                  <a href={`#${nav.id}`}>{nav.title}</a>
+                  {title}
                 </li>
               ))}
             </ul>

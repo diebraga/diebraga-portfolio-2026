@@ -149,6 +149,11 @@
   to   { clip-path: circle(0% at 50% 60%); }
 }
 
+/* Smooth anchor scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
 /* Portfolio custom styles */
 .hash-span {
   margin-top: -100px;
