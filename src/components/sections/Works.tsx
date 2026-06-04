@@ -1,46 +1,212 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import {
+  motion,
+  useAnimationFrame,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  useVelocity,
+  wrap,
+} from "framer-motion";
+import { FaGithub } from "react-icons/fa";
 import { styles } from "../../styles";
-import SectionWrapper from "../../hoc/SectionWrapper";
-import { fadeIn, textVariant } from "../../utils/motion";
+import { textVariant } from "../../utils/motion";
 import { projects } from "../../constants";
-import { BentoGrid, BentoGridItem } from "./BentoGrid";
+import SectionWrapper from "../../hoc/SectionWrapper";
 
+// ─── constants ────────────────────────────────────────────────────────────────
+const CARD_W   = 300;   // px — card width
+const CARD_H   = 380;   // px — card height
+const GAP      = 20;    // px — gap between cards
+const STEP     = CARD_W + GAP;
+const BASE_SPD = 55;    // px / s  — auto-scroll speed
+
+// split 10 projects into 2 rows
+const ROW_A = projects.slice(0, 5);
+const ROW_B = projects.slice(5);
+const ROW_A_W = ROW_A.length * STEP;
+const ROW_B_W = ROW_B.length * STEP;
+
+// ─── project card ─────────────────────────────────────────────────────────────
+function ProjectCard({ item }: { item: (typeof projects)[0] }) {
+  return (
+    <div
+      className="relative flex-shrink-0 rounded-2xl overflow-hidden border border-purple-900/30 bg-black/70 backdrop-blur-sm group"
+      style={{ width: CARD_W, height: CARD_H }}
+    >
+      {/* image */}
+      <div className="h-[55%] overflow-hidden">
+        <img
+          src={item.header}
+          alt={item.title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+        />
+      </div>
+
+      {/* body */}
+      <div className="p-4 flex flex-col gap-2 h-[45%]">
+        <h3 className="text-white font-bold text-sm leading-snug line-clamp-1">
+          {item.title}
+        </h3>
+        <p className="text-gray-400 text-xs leading-relaxed line-clamp-2 flex-1">
+          {item.description}
+        </p>
+
+        {/* tags */}
+        <div className="flex flex-wrap gap-1">
+          {item.tags.slice(0, 3).map((tag) => (
+            <span
+              key={tag}
+              className="text-[10px] px-2 py-0.5 rounded-full border border-purple-800/50 text-purple-300"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+
+        {/* links */}
+        <div className="flex items-center gap-3 pt-1">
+          <a
+            href={item.source_code_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-[11px] text-gray-300 hover:text-white transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FaGithub size={13} />
+            GitHub
+          </a>
+          {item.live && (
+            <a
+              href={item.live}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Live →
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* hover glow */}
+      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none ring-1 ring-purple-500/40 shadow-[inset_0_0_30px_rgba(139,92,246,0.08)]" />
+    </div>
+  );
+}
+
+// ─── scrolling row ────────────────────────────────────────────────────────────
+function ScrollRow({
+  items,
+  rowWidth,
+  direction,
+  tiltDeg,
+}: {
+  items: (typeof projects);
+  rowWidth: number;
+  direction: 1 | -1;
+  tiltDeg: ReturnType<typeof useSpring>;
+}) {
+  const x       = useMotionValue(direction === -1 ? 0 : -rowWidth);
+  const dirRef  = useRef(direction);
+  const paused  = useRef(false);
+
+  useAnimationFrame((_, delta) => {
+    if (paused.current) return;
+    const move = dirRef.current * BASE_SPD * (delta / 1000);
+    x.set(wrap(-rowWidth, 0, x.get() + move));
+  });
+
+  // 3D tilt on Y axis based on scroll speed + direction of row
+  const rotateY = useTransform(tiltDeg, (v) => v * direction * -0.4);
+
+  return (
+    <div
+      className="overflow-hidden"
+      style={{ perspective: "1200px" }}
+      onMouseEnter={() => { paused.current = true; }}
+      onMouseLeave={() => { paused.current = false; }}
+    >
+      <motion.div
+        style={{
+          x,
+          rotateY,
+          display: "flex",
+          gap: GAP,
+          width: rowWidth * 2,
+          willChange: "transform",
+        }}
+      >
+        {[...items, ...items].map((item, i) => (
+          <ProjectCard key={`${item.title}-${i}`} item={item} />
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── main section ─────────────────────────────────────────────────────────────
+function ProjectsMarquee() {
+  // feed page scroll into a MotionValue so useVelocity can track it
+  const scrollY        = useMotionValue(0);
+  const rawVelocity    = useVelocity(scrollY);
+
+  // smooth + dampen the velocity  →  tilt angle in degrees
+  const tiltDeg = useSpring(
+    useTransform(rawVelocity, [-3000, 3000], [-12, 12], { clamp: true }),
+    { damping: 40, stiffness: 200 }
+  );
+
+  // listen to portfolio-scroll custom event
+  useEffect(() => {
+    const handler = (e: Event) =>
+      scrollY.set((e as CustomEvent).detail.scrollTop as number);
+    window.addEventListener("portfolio-scroll", handler as EventListener);
+    return () =>
+      window.removeEventListener("portfolio-scroll", handler as EventListener);
+  }, [scrollY]);
+
+  return (
+    <div className="flex flex-col gap-6 mt-10 -mx-6 sm:-mx-16">
+      <ScrollRow
+        items={ROW_A}
+        rowWidth={ROW_A_W}
+        direction={-1}
+        tiltDeg={tiltDeg}
+      />
+      <ScrollRow
+        items={ROW_B}
+        rowWidth={ROW_B_W}
+        direction={1}
+        tiltDeg={tiltDeg}
+      />
+    </div>
+  );
+}
+
+// ─── section ──────────────────────────────────────────────────────────────────
 const Works = () => (
   <>
     <motion.div variants={textVariant()}>
-      <p className={`${styles.sectionSubText}`}>My work</p>
-      <h2 className={`${styles.sectionHeadText}`}>Personal Projects</h2>
+      <p className={styles.sectionSubText}>My work</p>
+      <h2 className={styles.sectionHeadText}>Personal Projects</h2>
     </motion.div>
 
-    <div className="w-full flex">
-      <motion.p
-        variants={fadeIn("", "", 0.1, 1)}
-        className="mt-3 text-[#aaa6c3] text-[17px] max-w-3xl leading-[30px]"
-      >
-        My projects highlight my technical skills, creativity, and passion for
-        technology. Each showcases unique challenges and innovative solutions,
-        complete with summaries, code repositories, and live demos. They
-        demonstrate my ability to experiment with new technologies and realize
-        imaginative ideas. ⚛️
-      </motion.p>
-    </div>
+    <motion.p
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      className="mt-3 text-[#aaa6c3] text-[17px] max-w-3xl leading-[30px]"
+    >
+      My projects highlight my technical skills, creativity, and passion for
+      technology — from 3D experiences and Web3 to ML and real-time apps. ⚛️
+    </motion.p>
 
-    <BentoGrid className="max-w-full">
-      {projects.map((item, i) => (
-        <BentoGridItem
-          key={i}
-          title={item.title}
-          description={item.description}
-          header={item.header}
-          link={item.source_code_link}
-          tags={item.tags}
-          live={item.live}
-          className={i === 3 || i === 6 ? "md:col-span-2" : ""}
-        />
-      ))}
-    </BentoGrid>
+    <ProjectsMarquee />
   </>
 );
 
