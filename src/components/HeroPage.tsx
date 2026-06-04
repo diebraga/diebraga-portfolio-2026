@@ -77,7 +77,7 @@ export default function HeroPage({ onViewPortfolio }: HeroPageProps) {
       </video>
 
       {/* Name + typewriter */}
-      <div className="absolute inset-0 top-[120px] max-w-7xl mx-auto px-6 sm:px-16 flex flex-row items-start gap-5">
+      <div className="absolute inset-0 top-[120px] max-w-7xl mx-auto px-6 sm:px-16 flex flex-row items-start gap-5 pointer-events-none">
         <h1 className="font-black text-white lg:text-[56px] sm:text-[60px] xs:text-[50px] text-[40px] lg:leading-[72px] mt-2">
           <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text">
             Diego Braga

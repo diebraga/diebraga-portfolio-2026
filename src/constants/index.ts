@@ -37,6 +37,53 @@ export const technologies = [
   { name: "git", icon: "/tech/git.png" },
 ];
 
+export const technologiesByRole = [
+  {
+    role: "Web Developer",
+    techs: [
+      { name: "HTML 5",     icon: "/tech/html.png" },
+      { name: "CSS 3",      icon: "/tech/css.png" },
+      { name: "JavaScript", icon: "/tech/javascript.png" },
+      { name: "TypeScript", icon: "/tech/typescript.png" },
+      { name: "React JS",   icon: "/tech/reactjs.png" },
+      { name: "Next.js",    icon: "/tech/next.png" },
+    ],
+  },
+  {
+    role: "React Native Developer",
+    techs: [
+      { name: "React Native", icon: "/tech/rn.png" },
+      { name: "Tailwind CSS", icon: "/tech/tailwind.png" },
+      { name: "Chakra UI",    icon: "/tech/chackra.jpeg" },
+      { name: "GraphQL",      icon: "/tech/graph.png" },
+      { name: "Apollo",       icon: "/tech/apollo.png" },
+      { name: "React Query",  icon: "/tech/query.png" },
+    ],
+  },
+  {
+    role: "Backend Developer",
+    techs: [
+      { name: "Node.js",  icon: "/tech/nodejs.png" },
+      { name: "Express",  icon: "/tech/express.jpeg" },
+      { name: "Socket",   icon: "/tech/socket.png" },
+      { name: "gRPC",     icon: "/tech/grpc.png" },
+      { name: "Prisma",   icon: "/tech/prisma.png" },
+      { name: "Python",   icon: "/tech/python.png" },
+    ],
+  },
+  {
+    role: "Web 3 Developer",
+    techs: [
+      { name: "Three JS", icon: "/tech/threejs.svg" },
+      { name: "Babylon",  icon: "/tech/babylon.png" },
+      { name: "Django",   icon: "/tech/django.png" },
+      { name: "GraphQL",  icon: "/tech/graph.png" },
+      { name: "Git",      icon: "/tech/git.png" },
+      { name: "TypeScript", icon: "/tech/typescript.png" },
+    ],
+  },
+];
+
 export const experiences = [
   {
     title: "Full Stack Web Developer",

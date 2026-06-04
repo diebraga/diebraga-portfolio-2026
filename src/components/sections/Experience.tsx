@@ -23,7 +23,7 @@ function ExperienceCard({
         ease: [0.22, 1, 0.36, 1],
         delay: 0.05,
       }}
-      style={{ transformStyle: "preserve-3d" }}
+      style={{ transformStyle: "preserve-3d", pointerEvents: "none" }}
       className="w-full"
     >
       <div className="relative border border-purple-900/40 rounded-2xl bg-black/70 backdrop-blur-sm overflow-hidden hover:border-purple-600/60 transition-colors duration-300">

@@ -1,11 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { TypewriterOverlay } from "./TypewriterOverlay/TypewriterOverlay";
 import HeroPage from "./HeroPage";
 import MainContent from "./MainContent";
 import Navbar from "./sections/Navbar";
+import ParallaxSceneSection from "./ParallaxSceneSection";
 import { useAudio } from "@/context/AudioContext";
 
 const LaptopCanvas = dynamic(() => import("./canvas/LaptopCanvas"), { ssr: false });
@@ -32,6 +33,7 @@ export default function Home() {
   const isMobile = useIsMobile();
   const { start } = useAudio();
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<Phase>("intro");
   const [isReadyToClick, setIsReadyToClick] = useState(false);
   const [hasPlayedTransition, setHasPlayedTransition] = useState(false);
@@ -93,6 +95,7 @@ export default function Home() {
           <Navbar />
 
           <div
+            ref={scrollContainerRef}
             className="absolute inset-0 z-10 overflow-y-auto"
             onScroll={(e) =>
               window.dispatchEvent(
@@ -109,6 +112,9 @@ export default function Home() {
             <div id="portfolio-content">
               <MainContent />
             </div>
+
+            {/* Parallax scene — very bottom, scroll-tracked against this container */}
+            <ParallaxSceneSection container={scrollContainerRef} />
           </div>
         </>
       )}
