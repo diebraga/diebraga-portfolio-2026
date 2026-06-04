@@ -17,18 +17,28 @@ function TechIcon({ tech }: { tech: { name: string; icon: string } }) {
       whileHover={{ scale: 1.15, rotate: 360 }}
       transition={{
         rotate: { type: "spring", stiffness: 260, damping: 20 },
-        scale:  { type: "spring", stiffness: 260, damping: 20 },
+        scale: { type: "spring", stiffness: 260, damping: 20 },
       }}
-      className="rounded-full bg-white flex-shrink-0 cursor-pointer"
+      className="rounded-full bg-white flex-shrink-0 cursor-pointer mt-4"
       style={{ width: ICON_SIZE, height: ICON_SIZE, padding: 10 }}
       title={tech.name}
     >
-      <img src={tech.icon} alt={tech.name} className="w-full h-full object-contain" />
+      <img
+        src={tech.icon}
+        alt={tech.name}
+        className="w-full h-full object-contain"
+      />
     </motion.div>
   );
 }
 
-function MarqueeRow({ items, direction = 1 }: { items: typeof allTechs; direction?: 1 | -1 }) {
+function MarqueeRow({
+  items,
+  direction = 1,
+}: {
+  items: typeof allTechs;
+  direction?: 1 | -1;
+}) {
   const x = useMotionValue(0);
   const totalW = items.length * STEP;
   const paused = useRef(false);
@@ -42,8 +52,12 @@ function MarqueeRow({ items, direction = 1 }: { items: typeof allTechs; directio
   return (
     <div
       className="overflow-hidden w-full"
-      onMouseEnter={() => { paused.current = true; }}
-      onMouseLeave={() => { paused.current = false; }}
+      onMouseEnter={() => {
+        paused.current = true;
+      }}
+      onMouseLeave={() => {
+        paused.current = false;
+      }}
     >
       <motion.div style={{ x, display: "flex", gap: GAP, width: totalW * 2 }}>
         {[...items, ...items].map((tech, i) => (
@@ -71,7 +85,10 @@ export default function Tech() {
       {/* Desktop — grouped rows */}
       <div className="hidden sm:flex flex-col gap-12">
         {technologiesByRole.map((group) => (
-          <div key={group.role} className="flex flex-row flex-wrap justify-center gap-10">
+          <div
+            key={group.role}
+            className="flex flex-row flex-wrap justify-center gap-10"
+          >
             {group.techs.map((tech) => (
               <TechIcon key={tech.name} tech={tech} />
             ))}
