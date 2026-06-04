@@ -69,9 +69,17 @@ const Navbar = () => {
     setActive(title);
     setToggle(false);
 
-    // Lock observer briefly so it doesn't fight the programmatic scroll
     isScrollingRef.current = true;
     setTimeout(() => { isScrollingRef.current = false; }, 1000);
+
+    // Contact → scroll to absolute bottom of the scroll container
+    if (id === "contact") {
+      const scroller = document.querySelector(".overflow-y-auto") as HTMLElement;
+      if (scroller) {
+        scroller.scrollTo({ top: scroller.scrollHeight, behavior: "smooth" });
+      }
+      return;
+    }
 
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
