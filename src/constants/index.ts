@@ -46,16 +46,16 @@ export const technologiesByRole = [
       { name: "JavaScript", icon: "/tech/javascript.png" },
       { name: "TypeScript", icon: "/tech/typescript.png" },
       { name: "React JS",   icon: "/tech/reactjs.png" },
-      { name: "Next.js",    icon: "/tech/next.png" },
+      { name: "Angular",    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/angular/angular-original.svg" },
     ],
   },
   {
     role: "React Native Developer",
     techs: [
       { name: "React Native", icon: "/tech/rn.png" },
+      { name: "Next.js",      icon: "/tech/next.png" },
       { name: "Tailwind CSS", icon: "/tech/tailwind.png" },
       { name: "Chakra UI",    icon: "/tech/chackra.jpeg" },
-      { name: "GraphQL",      icon: "/tech/graph.png" },
       { name: "Apollo",       icon: "/tech/apollo.png" },
       { name: "React Query",  icon: "/tech/query.png" },
     ],
@@ -63,12 +63,12 @@ export const technologiesByRole = [
   {
     role: "Backend Developer",
     techs: [
-      { name: "Node.js",  icon: "/tech/nodejs.png" },
-      { name: "Express",  icon: "/tech/express.jpeg" },
-      { name: "Socket",   icon: "/tech/socket.png" },
-      { name: "gRPC",     icon: "/tech/grpc.png" },
-      { name: "Prisma",   icon: "/tech/prisma.png" },
-      { name: "Python",   icon: "/tech/python.png" },
+      { name: "Node.js",     icon: "/tech/nodejs.png" },
+      { name: "MongoDB",     icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg" },
+      { name: "PostgreSQL",  icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg" },
+      { name: "FastAPI",     icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/fastapi/fastapi-original.svg" },
+      { name: "Python",      icon: "/tech/python.png" },
+      { name: "Django",      icon: "/tech/django.png" },
     ],
   },
   {
@@ -76,10 +76,10 @@ export const technologiesByRole = [
     techs: [
       { name: "Three JS", icon: "/tech/threejs.svg" },
       { name: "Babylon",  icon: "/tech/babylon.png" },
-      { name: "Django",   icon: "/tech/django.png" },
-      { name: "GraphQL",  icon: "/tech/graph.png" },
+      { name: "Solidity", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/solidity/solidity-original.svg" },
+      { name: "Azure",    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/azure/azure-original.svg" },
+      { name: "Cypress",  icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cypressio/cypressio-original.svg" },
       { name: "Git",      icon: "/tech/git.png" },
-      { name: "TypeScript", icon: "/tech/typescript.png" },
     ],
   },
 ];
