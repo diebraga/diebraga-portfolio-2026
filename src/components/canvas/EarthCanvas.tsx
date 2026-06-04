@@ -178,6 +178,7 @@ function Globe() {
           vertexShader={vert}
           fragmentShader={globeFrag}
           uniforms={globeUniforms}
+          // @ts-expect-error derivatives is a valid WebGL extension
           extensions={{ derivatives: true }}
         />
       </mesh>

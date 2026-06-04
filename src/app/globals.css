@@ -222,7 +222,3 @@ html {
   -webkit-text-fill-color: transparent;
 }
 
-/* Vertical Timeline override */
-.vertical-timeline::before {
-  background: #40046e !important;
-}
