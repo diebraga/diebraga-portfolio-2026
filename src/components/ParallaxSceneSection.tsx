@@ -67,48 +67,6 @@ export default function ParallaxSceneSection({
         marginBottom: "-6080px",
       }}
     >
-      {/* Text — sits at the very top of the 500vh container, scrolls away naturally */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 10,
-          textAlign: "center",
-          padding: "3rem 1rem 0",
-          pointerEvents: "none",
-          background:
-            "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%)",
-        }}
-      >
-        <p
-          style={{
-            color: "#c084fc",
-            fontSize: "0.9rem",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            marginBottom: "0.75rem",
-          }}
-        >
-          Let&apos;s work together
-        </p>
-        <h2
-          style={{
-            color: "#fff",
-            fontSize: "clamp(2rem, 5vw, 3.5rem)",
-            fontWeight: 700,
-            lineHeight: 1.1,
-            margin: 0,
-          }}
-        >
-          Have an idea?
-          <br />
-          Let&apos;s build it.
-        </h2>
-        <Tech />
-      </div>
-
       {/* Sticky frame — stays in viewport while user scrolls through the 500vh */}
       <div
         style={{
@@ -118,6 +76,33 @@ export default function ParallaxSceneSection({
           overflow: "hidden",
         }}
       >
+        {/* Text + Tech — pinned at top of sticky frame, never move */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 10,
+            textAlign: "center",
+            background: "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%)",
+          }}
+        >
+          {/* Heading — no pointer events needed */}
+          <div style={{ padding: "3rem 1rem 0", pointerEvents: "none" }}>
+            <p style={{ color: "#c084fc", fontSize: "0.9rem", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
+              Let&apos;s work together
+            </p>
+            <h2 style={{ color: "#fff", fontSize: "clamp(1.5rem, 4vw, 3rem)", fontWeight: 700, lineHeight: 1.1, margin: 0 }}>
+              Have an idea?<br />Let&apos;s build it.
+            </h2>
+          </div>
+          {/* Tech icons — interactive */}
+          <div style={{ padding: "1.5rem 1rem 0", pointerEvents: "auto" }}>
+            <Tech />
+          </div>
+        </div>
+
         {/* Bottom "Get in touch" — slides in at the very bottom */}
         <motion.div
           style={{
