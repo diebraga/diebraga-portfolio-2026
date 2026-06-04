@@ -41,7 +41,7 @@ export default function ParallaxSceneSection({
   });
   const baseY = useSpring(scrollYProgress, springConfig);
 
-  const y = useTransform(baseY, [0, 1], ["0vh", "-200vh"]);
+  const y = useTransform(baseY, [0, 1], ["0vh", "-175vh"]);
   const yStars1 = useTransform(baseY, [0, 1], ["10vh", "-70vh"]);
   const opStar = useTransform(baseY, [0, 0.5], [0.5, 0]);
   const xC1 = useTransform(baseY, [0, 1], ["-20vw", "0vw"]);
@@ -60,10 +60,11 @@ export default function ParallaxSceneSection({
     <div
       ref={containerRef}
       style={{
-        height: "500vh",
+        height: "calc(500vh - 2000px)",
         width: "100%",
         overflow: "clip",
         position: "relative",
+        marginBottom: "-6080px",
       }}
     >
       {/* Text — sits at the very top of the 500vh container, scrolls away naturally */}
@@ -109,7 +110,14 @@ export default function ParallaxSceneSection({
       </div>
 
       {/* Sticky frame — stays in viewport while user scrolls through the 500vh */}
-      <div style={{ position: "sticky", top: 0, height: "100vh" }}>
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          overflow: "hidden",
+        }}
+      >
         {/* Bottom "Get in touch" — slides in at the very bottom */}
         <motion.div
           style={{
