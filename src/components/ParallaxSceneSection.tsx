@@ -221,7 +221,7 @@ export default function ParallaxSceneSection({
                   height="100%"
                   preserveAspectRatio="none"
                   transform="translate(500 0)"
-                  href="https://raw.githubusercontent.com/SochavaAG/example-mycode/master/pens/starry-sky/images/cloud.png"
+                  href="/cloud-1.png"
                 />
               </motion.g>
               <motion.g style={{ x: xC2 }}>
@@ -230,7 +230,7 @@ export default function ParallaxSceneSection({
                   height="150%"
                   preserveAspectRatio="none"
                   transform="translate(-250 -40) rotate(5)"
-                  href="https://raw.githubusercontent.com/SochavaAG/example-mycode/master/pens/starry-sky/images/cloud-2.png"
+                  href="/cloud-2.png"
                 />
               </motion.g>
             </svg>
