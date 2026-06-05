@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, useId } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
-// ── tilt hook (exact port from source) ───────────────────────────────────────
 function useTilt(active: boolean) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -13,19 +12,17 @@ function useTilt(active: boolean) {
     const unify = (e: MouseEvent | TouchEvent) =>
       "changedTouches" in e ? e.changedTouches[0] : e;
 
-    let rect: DOMRect | undefined;
+    const state: { rect?: DOMRect } = {};
 
     const onEnter = () => {
       el.style.transition = "transform 150ms ease-out";
     };
     const onMove = (e: MouseEvent | TouchEvent) => {
       e.preventDefault();
-      if (!rect) rect = el.getBoundingClientRect();
+      if (!state.rect) state.rect = el.getBoundingClientRect();
       const u = unify(e);
-      const px = ((u.clientX - rect.left) / rect.width).toFixed(2);
-      const py = ((u.clientY - rect.top) / rect.height).toFixed(2);
-      el.style.setProperty("--px", px);
-      el.style.setProperty("--py", py);
+      el.style.setProperty("--px", ((u.clientX - state.rect.left) / state.rect.width).toFixed(2));
+      el.style.setProperty("--py", ((u.clientY - state.rect.top) / state.rect.height).toFixed(2));
     };
     const onLeave = () => {
       el.style.setProperty("--px", "0.5");
@@ -53,7 +50,6 @@ function useTilt(active: boolean) {
   return ref;
 }
 
-// ── Slide ─────────────────────────────────────────────────────────────────────
 interface SlideProps {
   image: string;
   offset: number;
@@ -66,55 +62,35 @@ function Slide({ image, offset }: SlideProps) {
 
   return (
     <div
-      style={{
-        gridArea: "1 / -1",
-        position: "relative",
-        zIndex: active ? 2 : 1,
-        pointerEvents: active ? "auto" : "none",
-        // CSS custom props for tilt
-        ["--offset" as string]: offset,
-        ["--dir" as string]: dir,
-        ["--px" as string]: 0.5,
-        ["--py" as string]: 0.5,
-      }}
+      data-active={active || undefined}
+      style={
+        {
+          gridArea: "1 / -1",
+          position: "relative",
+          zIndex: active ? 2 : 1,
+          pointerEvents: active ? "auto" : "none",
+          "--offset": offset,
+          "--dir": dir,
+          "--px": 0.5,
+          "--py": 0.5,
+        } as React.CSSProperties
+      }
     >
-      {/* Active card tilt wrapper */}
       <div
-        ref={active ? tiltRef : undefined}
+        ref={tiltRef}
+        className={active ? "slideContent slideContent--active" : "slideContent"}
         style={{
-          width: 250,
-          height: 300,
           backgroundImage: `url('${image}')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          borderRadius: 15,
-          opacity: active ? 1 : 0.55,
-          transition: "transform 0.7s cubic-bezier(0.33, 1, 0.68, 1), opacity 0.5s ease, box-shadow 0.5s ease, filter 0.5s ease",
-          transformStyle: "preserve-3d",
-          willChange: "transform",
-          transform: active
-            ? "perspective(1000px) translateX(calc(100% * var(--offset)))"
-            : `perspective(1000px) translateX(calc(100% * ${offset})) rotateY(calc(-45deg * ${dir}))`,
-          // B&W — active card slightly more vivid, side cards full grayscale
-          filter: active
-            ? "grayscale(100%) brightness(1.05)"
-            : "grayscale(100%) brightness(0.75)",
-          // Purple glow — stronger on active
-          boxShadow: active
-            ? "0 0 0 2px #a855f7, 0 0 25px 6px rgba(168,85,247,0.55), 0 0 60px 10px rgba(168,85,247,0.2)"
-            : "0 0 0 1px #7c3aed55, 0 0 12px 2px rgba(124,58,237,0.25)",
         }}
-        className={active ? "slide-active" : ""}
       />
     </div>
   );
 }
 
-// ── Carousel ──────────────────────────────────────────────────────────────────
 interface Carousel3DProps {
   images: string[];
-  autoPlayMs?: number;   // auto-advance interval, default 4000ms
-  dragThreshold?: number; // px needed to trigger slide, default 50
+  autoPlayMs?: number;
+  dragThreshold?: number;
 }
 
 export default function Carousel3D({
@@ -122,17 +98,14 @@ export default function Carousel3D({
   autoPlayMs = 4000,
   dragThreshold = 50,
 }: Carousel3DProps) {
-  // Unbounded index — never wraps, so slides always move in the same direction
   const [index, setIndex] = useState(0);
   const hovered = useRef(false);
+  const count = images.length;
 
-  const prev = useCallback(() => setIndex((i) => i - 1), []);
-  const next = useCallback(() => setIndex((i) => i + 1), []);
-
-  // Positive modulo helper
   const mod = (n: number, m: number) => ((n % m) + m) % m;
+  const prev = useCallback(() => setIndex((i) => mod(i - 1, count)), [count]);
+  const next = useCallback(() => setIndex((i) => mod(i + 1, count)), [count]);
 
-  // ── Auto-play ──────────────────────────────────────────────────────────────
   useEffect(() => {
     const id = setInterval(() => {
       if (!hovered.current) next();
@@ -140,10 +113,11 @@ export default function Carousel3D({
     return () => clearInterval(id);
   }, [next, autoPlayMs]);
 
-  // ── Drag-to-slide ──────────────────────────────────────────────────────────
+  // Drag / swipe
   const dragStart = useRef<number | null>(null);
 
   const onPointerDown = (e: React.PointerEvent) => {
+    if ((e.target as HTMLElement).closest("button")) return;
     dragStart.current = e.clientX;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
@@ -154,16 +128,41 @@ export default function Carousel3D({
     else if (delta < -dragThreshold) prev();
     dragStart.current = null;
   };
-  const onPointerCancel = () => { dragStart.current = null; };
+
+  // Compute offsets: tripled array so wrapping is seamless
+  const tripled = [...images, ...images, ...images];
 
   return (
     <>
       <style>{`
-        .slide-active:hover {
-          transition: opacity 0.5s ease, box-shadow 0.5s ease, filter 0.5s ease !important;
+        .slideContent {
+          width: 250px;
+          height: 300px;
+          background-size: cover;
+          background-position: center;
+          border-radius: 15px;
+          opacity: 0.55;
+          filter: grayscale(100%) brightness(0.75);
+          box-shadow: 0 0 0 1px #7c3aed55, 0 0 12px 2px rgba(124,58,237,0.25);
+          transform-style: preserve-3d;
+          transition: transform 0.5s ease-in-out, opacity 0.5s, filter 0.5s, box-shadow 0.5s;
+          transform: perspective(1000px)
+            translateX(calc(100% * var(--offset)))
+            rotateY(calc(-45deg * var(--dir)));
+        }
+        .slideContent--active {
+          opacity: 1;
+          filter: grayscale(100%) brightness(1.05);
+          box-shadow: 0 0 0 2px #a855f7,
+            0 0 25px 6px rgba(168,85,247,0.55),
+            0 0 60px 10px rgba(168,85,247,0.2);
+          transform: perspective(1000px) translateX(calc(100% * var(--offset)));
+        }
+        .slideContent--active:hover {
+          transition: none;
           transform: perspective(1000px)
             rotateY(calc((var(--px, 0.5) - 0.5) * 45deg))
-            rotateX(calc((var(--py, 0.5) - 0.5) * -45deg)) !important;
+            rotateX(calc((var(--py, 0.5) - 0.5) * -45deg));
         }
       `}</style>
 
@@ -172,10 +171,11 @@ export default function Carousel3D({
         onMouseLeave={() => { hovered.current = false; }}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
-        onPointerCancel={onPointerCancel}
+        onPointerCancel={() => { dragStart.current = null; }}
         style={{
-          minHeight: 400,
+          minHeight: 500,
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
@@ -186,55 +186,55 @@ export default function Carousel3D({
           touchAction: "none",
         }}
       >
-        {/* Prev button */}
         <button
           onClick={prev}
           style={{
-            position: "absolute",
-            left: "5%",
-            zIndex: 10,
-            background: "transparent",
-            border: "none",
-            color: "white",
-            fontSize: "2rem",
-            cursor: "pointer",
-            opacity: 0.8,
-            top: "50%",
-            transform: "translateY(-50%)",
+            position: "absolute", left: "5%", top: "40%",
+            transform: "translateY(-50%)", zIndex: 10,
+            background: "transparent", border: "none",
+            color: "white", fontSize: "2rem", cursor: "pointer", opacity: 0.8,
           }}
           aria-label="Previous"
         >
           <IoChevronBack />
         </button>
 
-        {/* Slides grid — 5 visible slots: -2, -1, 0, +1, +2 */}
-        <div style={{ display: "grid", placeItems: "center" }}>
-          {[-2, -1, 0, 1, 2].map((offset) => {
-            const imgIndex = mod(index + offset, images.length);
-            return <Slide key={offset} image={images[imgIndex]} offset={offset} />;
+        <div style={{ display: "grid" }}>
+          {tripled.map((img, i) => {
+            const offset = count + (index - i);
+            return <Slide key={i} image={img} offset={offset} />;
           })}
         </div>
 
-        {/* Next button */}
         <button
           onClick={next}
           style={{
-            position: "absolute",
-            right: "5%",
-            zIndex: 10,
-            background: "transparent",
-            border: "none",
-            color: "white",
-            fontSize: "2rem",
-            cursor: "pointer",
-            opacity: 0.8,
-            top: "50%",
-            transform: "translateY(-50%)",
+            position: "absolute", right: "5%", top: "40%",
+            transform: "translateY(-50%)", zIndex: 10,
+            background: "transparent", border: "none",
+            color: "white", fontSize: "2rem", cursor: "pointer", opacity: 0.8,
           }}
           aria-label="Next"
         >
           <IoChevronForward />
         </button>
+
+        {/* Dots */}
+        <div style={{ display: "flex", gap: 8, marginTop: 24 }}>
+          {images.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIndex(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              style={{
+                width: 8, height: 8, borderRadius: "50%",
+                border: "none", cursor: "pointer", padding: 0,
+                background: i === index ? "#a855f7" : "rgba(255,255,255,0.3)",
+                transition: "background 0.3s",
+              }}
+            />
+          ))}
+        </div>
       </section>
     </>
   );
