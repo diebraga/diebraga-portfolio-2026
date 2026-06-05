@@ -7,7 +7,7 @@ export const navLinks = [
 
 export const services = [
   { title: "Web Developer", icon: "/tech/reactjs.png" },
-  { title: "Mobile Development", icon: "/tech/rn.png" },
+  { title: "Mobile Developer", icon: "/tech/rn.png" },
   { title: "Backend Developer", icon: "/tech/nodejs.png", icon2: "/tech/python.png" },
   { title: "Web 3 Developer", icon: "/tech/ethh.png" },
 ];
