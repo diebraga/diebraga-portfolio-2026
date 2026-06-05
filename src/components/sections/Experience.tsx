@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { styles } from "../../styles";
 import { textVariant } from "../../utils/motion";
@@ -39,10 +40,12 @@ function ExperienceCard({
               className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-purple-900/30 flex-shrink-0"
               style={{ background: exp.iconBg }}
             >
-              <img
+              <Image
                 src={exp.icon}
                 alt={exp.company_name}
-                className="w-8 h-8 object-contain"
+                width={32}
+                height={32}
+                className="object-contain"
               />
             </div>
 

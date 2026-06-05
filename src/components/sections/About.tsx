@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
+
+const MotionImage = motion.create(Image);
 import { styles } from "../../styles";
 import { services } from "../../constants";
 import SectionWrapper from "../../hoc/SectionWrapper";
@@ -20,40 +23,55 @@ const ServiceCard = ({ index, title, icon, icon2 }: ServiceCardProps) => {
 
   const rotateAnimation = {
     rotate: isHovering ? 360 : 0,
-    transition: { duration: 2, ease: "linear" as const, repeat: Infinity, repeatType: "loop" as const },
+    transition: {
+      duration: 2,
+      ease: "linear" as const,
+      repeat: Infinity,
+      repeatType: "loop" as const,
+    },
   };
 
   return (
-    <div className="w-[250px]" onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+    <div
+      className="w-[250px]"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       <motion.div
         variants={fadeIn("right", "spring", index * 0.5, 0.75)}
         className="shadow-xl shadow-purple-300/50 text-purple-200 border-purple-300 border-2 rounded-xl"
       >
         <div className="bg-black rounded-[20px] py-5 px-12 min-h-[280px] flex justify-evenly items-center flex-col">
           <div className="flex">
-            <motion.img
+            <MotionImage
               animate={rotateAnimation}
               src={icon}
               alt={title}
-              className="w-16 h-16 object-contain"
+              width={64}
+              height={64}
+              className="object-contain"
             />
             {icon2 && (
-              <motion.img
+              <MotionImage
                 animate={rotateAnimation}
                 src={icon2}
                 alt={title}
-                className="w-16 h-16 object-contain"
+                width={64}
+                height={64}
+                className="object-contain"
               />
             )}
           </div>
-          <h3 className="text-white text-[20px] font-bold text-center">{title}</h3>
+          <h3 className="text-white text-[20px] font-bold text-center">
+            {title}
+          </h3>
         </div>
       </motion.div>
     </div>
   );
 };
 
-const photoImages = ["/d1.png", "/d2.png", "/d3.png"];
+const photoImages = ["/d1.png", "/d2.png", "/d3.png", "/d4.jpeg", "/d5.jpeg"];
 
 function calculateYearsSince(dateString: string): number {
   const diff = new Date().getTime() - new Date(dateString).getTime();
@@ -77,10 +95,11 @@ const About = () => {
           variants={fadeIn("", "", 0.1, 1)}
           className="mt-4 text-[#aaa6c3] text-[17px] max-w-3xl leading-[30px] text-center mx-auto"
         >
-          Hi, my name is Diego Braga, and I&apos;m a passionate software developer
-          based in Ireland with expertise in TypeScript, JavaScript, React, Next.js,
-          and Node.js. I have over {calculateYearsSince("2019-10-01")} years of
-          industry experience building amazing experiences ✨.
+          Hi, my name is Diego Braga, and I&apos;m a passionate software
+          developer based in Ireland with expertise in TypeScript, JavaScript,
+          React, Next.js, and Node.js. I have over{" "}
+          {calculateYearsSince("2019-10-01")} years of industry experience
+          building amazing experiences ✨.
         </motion.p>
       </div>
 

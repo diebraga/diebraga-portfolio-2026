@@ -88,13 +88,21 @@ function Slide({ image, offset }: SlideProps) {
           backgroundSize: "cover",
           backgroundPosition: "center",
           borderRadius: 15,
-          opacity: active ? 1 : 0.7,
-          transition: "transform 0.5s ease-in-out",
+          opacity: active ? 1 : 0.55,
+          transition: "transform 0.7s cubic-bezier(0.33, 1, 0.68, 1), opacity 0.5s ease, box-shadow 0.5s ease, filter 0.5s ease",
           transformStyle: "preserve-3d",
+          willChange: "transform",
           transform: active
             ? "perspective(1000px) translateX(calc(100% * var(--offset)))"
             : `perspective(1000px) translateX(calc(100% * ${offset})) rotateY(calc(-45deg * ${dir}))`,
-          filter: active ? "none" : "grayscale(30%)",
+          // B&W — active card slightly more vivid, side cards full grayscale
+          filter: active
+            ? "grayscale(100%) brightness(1.05)"
+            : "grayscale(100%) brightness(0.75)",
+          // Purple glow — stronger on active
+          boxShadow: active
+            ? "0 0 0 2px #a855f7, 0 0 25px 6px rgba(168,85,247,0.55), 0 0 60px 10px rgba(168,85,247,0.2)"
+            : "0 0 0 1px #7c3aed55, 0 0 12px 2px rgba(124,58,237,0.25)",
         }}
         className={active ? "slide-active" : ""}
       />
@@ -114,17 +122,15 @@ export default function Carousel3D({
   autoPlayMs = 4000,
   dragThreshold = 50,
 }: Carousel3DProps) {
+  // Unbounded index — never wraps, so slides always move in the same direction
   const [index, setIndex] = useState(0);
   const hovered = useRef(false);
 
-  const prev = useCallback(
-    () => setIndex((i) => (i === 0 ? images.length - 1 : i - 1)),
-    [images.length]
-  );
-  const next = useCallback(
-    () => setIndex((i) => (i + 1) % images.length),
-    [images.length]
-  );
+  const prev = useCallback(() => setIndex((i) => i - 1), []);
+  const next = useCallback(() => setIndex((i) => i + 1), []);
+
+  // Positive modulo helper
+  const mod = (n: number, m: number) => ((n % m) + m) % m;
 
   // ── Auto-play ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -154,7 +160,7 @@ export default function Carousel3D({
     <>
       <style>{`
         .slide-active:hover {
-          transition: none !important;
+          transition: opacity 0.5s ease, box-shadow 0.5s ease, filter 0.5s ease !important;
           transform: perspective(1000px)
             rotateY(calc((var(--px, 0.5) - 0.5) * 45deg))
             rotateX(calc((var(--py, 0.5) - 0.5) * -45deg)) !important;
@@ -201,11 +207,11 @@ export default function Carousel3D({
           <IoChevronBack />
         </button>
 
-        {/* Slides grid */}
+        {/* Slides grid — 5 visible slots: -2, -1, 0, +1, +2 */}
         <div style={{ display: "grid", placeItems: "center" }}>
-          {[...images, ...images, ...images].map((img, i) => {
-            const offset = images.length + (index - i);
-            return <Slide key={i} image={img} offset={offset} />;
+          {[-2, -1, 0, 1, 2].map((offset) => {
+            const imgIndex = mod(index + offset, images.length);
+            return <Slide key={offset} image={images[imgIndex]} offset={offset} />;
           })}
         </div>
 

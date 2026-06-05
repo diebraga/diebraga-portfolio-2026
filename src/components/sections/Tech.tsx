@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import { motion, useAnimationFrame, useMotionValue, wrap } from "framer-motion";
 import { technologiesByRole } from "../../constants";
 
@@ -20,13 +21,14 @@ function TechIcon({ tech }: { tech: { name: string; icon: string } }) {
         scale: { type: "spring", stiffness: 260, damping: 20 },
       }}
       className="rounded-full bg-white flex-shrink-0 cursor-pointer mt-4"
-      style={{ width: ICON_SIZE, height: ICON_SIZE, padding: 10 }}
+      style={{ width: ICON_SIZE, height: ICON_SIZE, padding: 10, position: "relative" }}
       title={tech.name}
     >
-      <img
+      <Image
         src={tech.icon}
         alt={tech.name}
-        className="w-full h-full object-contain"
+        fill
+        className="object-contain"
       />
     </motion.div>
   );

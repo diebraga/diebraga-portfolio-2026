@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { FaGithub } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
@@ -46,8 +47,8 @@ export const BentoGridItem = ({
       className
     )}
   >
-    <div className="overflow-hidden rounded-lg h-96">
-      <img className="object-cover w-full h-full" src={header} alt={title} />
+    <div className="relative overflow-hidden rounded-lg h-96">
+      <Image className="object-cover" src={header} alt={title} fill />
     </div>
     <div className="group-hover/bento:translate-x-2 transition duration-200">
       <div className="font-sans font-bold mb-2 mt-2">{title}</div>

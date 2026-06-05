@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 import {
   motion,
@@ -37,11 +38,12 @@ function ProjectCard({ item }: { item: (typeof projects)[0] }) {
       style={{ width: CARD_W, height: CARD_H }}
     >
       {/* image */}
-      <div className="h-[55%] overflow-hidden">
-        <img
+      <div className="h-[55%] overflow-hidden relative">
+        <Image
           src={item.header}
           alt={item.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
       </div>
