@@ -117,7 +117,7 @@ export default function ParallaxSceneSection({
             y: btnY,
           }}
         >
-          <a href="mailto:diebraga.devolper@gmail.com">
+          <a href="mailto:diebraga.developer@gmail.com">
             <Button
               variant="outline"
               className="animate-pulse shadow-xl shadow-purple-300/50 text-purple-100 border-purple-200 border-4 flex items-center gap-2 bg-transparent hover:bg-purple-900/30 hover:text-purple-100 px-8 py-6 text-base"
