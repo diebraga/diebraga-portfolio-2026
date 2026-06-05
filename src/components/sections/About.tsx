@@ -6,13 +6,7 @@ import { styles } from "../../styles";
 import { services } from "../../constants";
 import SectionWrapper from "../../hoc/SectionWrapper";
 import { fadeIn, textVariant } from "../../utils/motion";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import Carousel3D from "../Carousel3D";
 
 interface ServiceCardProps {
   index: number;
@@ -75,27 +69,8 @@ const About = () => {
       </motion.div>
 
       <div className="flex flex-wrap mt-5 sm:flex-col justify-center items-center">
-        <div className="w-full max-w-md mx-auto">
-          <Carousel opts={{ loop: true }} className="w-full">
-            <CarouselContent>
-              {photoImages.map((src, i) => (
-                <CarouselItem key={i}>
-                  <div className="w-full flex justify-center py-9 pb-20">
-                    <div className="shadow-purple-200/50 rounded-lg shadow-card">
-                      <img
-                        src={src}
-                        alt={`Diego ${i + 1}`}
-                        className="object-cover w-72 rounded-lg"
-                        style={{ filter: "grayscale(100%)" }}
-                      />
-                    </div>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-2 bg-black/80 border-2 border-purple-200 text-purple-100 hover:bg-black hover:text-purple-100 shadow-xl shadow-purple-300/50" />
-            <CarouselNext className="right-2 bg-black/80 border-2 border-purple-200 text-purple-100 hover:bg-black hover:text-purple-100 shadow-xl shadow-purple-300/50" />
-          </Carousel>
+        <div className="w-full">
+          <Carousel3D images={photoImages} />
         </div>
 
         <motion.p
