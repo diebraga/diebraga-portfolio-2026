@@ -20,15 +20,16 @@ function TechIcon({ tech }: { tech: { name: string; icon: string } }) {
         rotate: { type: "spring", stiffness: 260, damping: 20 },
         scale: { type: "spring", stiffness: 260, damping: 20 },
       }}
-      className="rounded-full bg-white flex-shrink-0 cursor-pointer mt-4"
-      style={{ width: ICON_SIZE, height: ICON_SIZE, padding: 10, position: "relative" }}
+      className="rounded-full bg-white flex-shrink-0 cursor-pointer mt-4 flex items-center justify-center overflow-hidden"
+      style={{ width: ICON_SIZE, height: ICON_SIZE, padding: 10 }}
       title={tech.name}
     >
       <Image
         src={tech.icon}
         alt={tech.name}
-        fill
-        className="object-contain"
+        width={ICON_SIZE - 20}
+        height={ICON_SIZE - 20}
+        className="object-contain w-full h-full"
       />
     </motion.div>
   );
