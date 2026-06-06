@@ -80,6 +80,7 @@ export default function TerminalModal({ open, onClose }: { open: boolean; onClos
       <DialogContent
         className="p-0 border-0 bg-transparent shadow-none !max-w-[600px] w-[95vw]"
         style={{ outline: "none" }}
+        showCloseButton={false}
       >
         {/* visually hidden title for accessibility */}
         <DialogTitle className="sr-only">Contact Terminal</DialogTitle>
