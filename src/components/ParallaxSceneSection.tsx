@@ -6,6 +6,7 @@ import { useScroll, useSpring, useTransform, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { IoArrowForward } from "react-icons/io5";
 import Tech from "./sections/Tech";
+import TwinklingStars from "./TwinklingStars";
 
 const springConfig = {
   stiffness: 950,
@@ -44,6 +45,8 @@ export default function ParallaxSceneSection({
   const baseY = useSpring(scrollYProgress, springConfig);
 
   const y = useTransform(baseY, [0, 1], ["0vh", "-175vh"]);
+  // counter-transform so TwinklingStars stays fixed inside the moving sky div
+  const yStarsFixed = useTransform(baseY, [0, 1], ["0vh", "175vh"]);
   const yStars1 = useTransform(baseY, [0, 1], ["10vh", "-70vh"]);
   const opStar = useTransform(baseY, [0, 0.5], [0.5, 0]);
   const xC1 = useTransform(baseY, [0, 1], ["-20vw", "0vw"]);
@@ -151,6 +154,22 @@ export default function ParallaxSceneSection({
             transition: { duration: 2, ease: "easeIn" },
           }}
         >
+          {/* Twinkling stars — counter-transformed to stay fixed, behind mountains (z3) and clouds (z4) */}
+          <motion.div
+            style={{
+              y: yStarsFixed,
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100vh",
+              zIndex: 2,
+              pointerEvents: "none",
+            }}
+          >
+            <TwinklingStars count={200} />
+          </motion.div>
+
           {/* Stars 1 */}
           <motion.div
             style={{
