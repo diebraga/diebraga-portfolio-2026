@@ -10,18 +10,43 @@ const allSections = [
 ];
 
 const Navbar = () => {
-  const [active, setActive] = useState("Hero");
-  const [toggle, setToggle] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  // Prevent observer from overriding an in-flight programmatic scroll
+  const [active,    setActive]    = useState("Hero");
+  const [toggle,    setToggle]    = useState(false);
+  const [scrolled,  setScrolled]  = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const isScrollingRef = useRef(false);
+  const prevScrollTop  = useRef(0);
 
-  // Opacity on scroll
+  // Collapse near bottom, restore on scroll-up or back to top
   useEffect(() => {
-    const handleScroll = (e: Event) =>
-      setScrolled((e as CustomEvent).detail.scrollTop > 100);
+    const handleScroll = (e: Event) => {
+      const { scrollTop } = (e as CustomEvent).detail as { scrollTop: number };
+      const scroller = document.querySelector(".overflow-y-auto") as HTMLElement | null;
+
+      setScrolled(scrollTop > 100);
+
+      if (scroller) {
+        const nearBottom = scrollTop + scroller.clientHeight >= scroller.scrollHeight - 300;
+        const scrollingUp = scrollTop < prevScrollTop.current - 5;
+
+        if (nearBottom)                      setCollapsed(true);
+        if (scrollingUp || scrollTop < 120)  setCollapsed(false);
+      }
+
+      prevScrollTop.current = scrollTop;
+    };
+
     window.addEventListener("portfolio-scroll", handleScroll);
     return () => window.removeEventListener("portfolio-scroll", handleScroll);
+  }, []);
+
+  // Restore when user hovers within 80px of the top
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (e.clientY < 80) setCollapsed(false);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    return () => window.removeEventListener("mousemove", onMouseMove);
   }, []);
 
   // IntersectionObserver — whichever section is most visible wins
@@ -90,6 +115,10 @@ const Navbar = () => {
       className={`sm:px-16 px-6 w-full flex items-center py-5 fixed top-0 z-20 backdrop-blur-sm transition-colors duration-300 ${
         scrolled ? "bg-[#0b0013]/90" : "bg-[#0b0013]/40"
       }`}
+      style={{
+        transform: collapsed ? "translateY(-110%)" : "translateY(0)",
+        transition: "transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s",
+      }}
     >
       <div className="w-full flex justify-end items-center max-w-7xl mx-auto">
 
