@@ -241,13 +241,24 @@ const About = () => {
 
         <motion.p
           variants={fadeIn("", "", 0.1, 1)}
-          className="mt-4 text-[#aaa6c3] text-[17px] max-w-3xl leading-[30px] text-center mx-auto"
+          className="mt-4 text-gray-200 text-[17px] max-w-3xl leading-[30px] text-left"
         >
-          Hi, my name is Diego Braga, and I&apos;m a passionate software
-          developer based in Ireland with expertise in TypeScript, JavaScript,
-          React, Next.js, and Node.js. I have over{" "}
-          {calculateYearsSince("2019-10-01")} years of industry experience
-          building amazing experiences ✨.
+          Hi, I&apos;m Diego.{" "}
+          <motion.span
+            animate={{ rotate: [0, 25, -15, 25, -10, 0] }}
+            transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 0, ease: "easeInOut" }}
+            style={{ display: "inline-block", transformOrigin: "70% 80%", fontSize: "1.4em" }}
+          >
+            👋
+          </motion.span>
+          <br /><br />
+          My journey into technology started back in 2009 when I was just 14 years old, assembling my very first Windows XP machine from spare parts. By 15, just for fun, I built and launched my very first webpage. It was a time when we used jQuery to bring things to life on the screen and handled the database with PHP.
+          <br /><br />
+          I absolutely loved making things work, and watching how technology has evolved since then has been incredible.
+          <br /><br />
+          That childhood passion became my career. Since 2018, I&apos;ve been shipping applications professionally, turning creativity into amazing experiences. For me, the web is art.
+          <br /><br />
+          Welcome to my space.
           <br /><br />
           <span className="text-[#aaa6c3]">Languages: </span>
           <span className="text-white">Portuguese · Spanish · English · French · Italian</span>

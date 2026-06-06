@@ -318,8 +318,8 @@ function CareerFlowInner() {
         <Background
           variant={BackgroundVariant.Lines}
           gap={38} size={0.5}
-          color="rgba(109,40,217,0.08)"
-          style={{ background: "#050816" }}
+          color="rgba(109,40,217,0.06)"
+          style={{ background: "#000" }}
         />
       </ReactFlow>
     </div>
