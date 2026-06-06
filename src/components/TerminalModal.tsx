@@ -31,7 +31,7 @@ const LINES: Line[] = [
   { type: "out",  text: "}" },
   { type: "blank", text: "" },
   { type: "cmd",  text: "echo $STATUS" },
-  { type: "out",  text: "turning coffee into production code ☕" },
+  { type: "out",  text: "available" },
   { type: "blank", text: "" },
 ];
 
