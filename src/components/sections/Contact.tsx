@@ -7,10 +7,8 @@ import { slideIn } from "../../utils/motion";
 import { Button } from "../ui/button";
 import { IoArrowForward } from "react-icons/io5";
 import TerminalModal from "../TerminalModal";
-import { useIsMobile } from "@/hooks/useIsMobile";
 
 const Contact = () => {
-  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,22 +21,11 @@ const Contact = () => {
           className="w-full flex justify-center items-center py-6"
           style={{ backgroundColor: "#0b0013" }}
         >
-          {isMobile ? (
-            <a href="mailto:diebraga.developer@gmail.com">
-              <Button variant="outline" className="animate-pulse shadow-xl shadow-purple-300/50 text-purple-100 border-purple-200 border-4 flex items-center gap-2 bg-transparent hover:bg-purple-900/30 hover:text-purple-100 px-8 py-6 text-base">
-                <strong>Get In Touch</strong>
-                <IoArrowForward size={20} className="text-purple-100" />
-              </Button>
-            </a>
-          ) : (
-            <>
-              <Button variant="outline" onClick={() => setOpen(true)} className="animate-pulse shadow-xl shadow-purple-300/50 text-purple-100 border-purple-200 border-4 flex items-center gap-2 bg-transparent hover:bg-purple-900/30 hover:text-purple-100 px-8 py-6 text-base">
-                <strong>Get In Touch</strong>
-                <IoArrowForward size={20} className="text-purple-100" />
-              </Button>
-              <TerminalModal open={open} onClose={() => setOpen(false)} />
-            </>
-          )}
+          <Button variant="outline" onClick={() => setOpen(true)} className="animate-pulse shadow-xl shadow-purple-300/50 text-purple-100 border-purple-200 border-4 flex items-center gap-2 bg-transparent hover:bg-purple-900/30 hover:text-purple-100 px-8 py-6 text-base">
+            <strong>Get In Touch</strong>
+            <IoArrowForward size={20} className="text-purple-100" />
+          </Button>
+          <TerminalModal open={open} onClose={() => setOpen(false)} />
         </footer>
       </motion.div>
     </div>
