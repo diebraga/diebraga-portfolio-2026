@@ -7,7 +7,7 @@ import Works from "./sections/Works";
 
 export default function MainContent() {
   return (
-    <div className="relative z-0" style={{ backgroundColor: "#0b0013" }}>
+    <div className="relative z-0 bg-black">
       <About />
       <Experience />
       <Works />

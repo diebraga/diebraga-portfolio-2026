@@ -103,6 +103,7 @@ export default function ParallaxSceneSection({
           height: "100vh",
           overflow: "hidden",
           zIndex: 0,
+          background: "#000",
         }}
       >
         {/* Bottom "Get in touch" — slides in at the very bottom */}
