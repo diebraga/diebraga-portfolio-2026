@@ -85,7 +85,7 @@ export function MacBook({
     state.camera.position.z = THREE.MathUtils.lerp(
       state.camera.position.z,
       targetCameraZ,
-      0.05,
+      0.08,
     );
 
     if (outerGroupRef.current) {
@@ -148,7 +148,7 @@ export function MacBook({
     }
 
     // 7. Handshake execution trigger to flip into DOM layout visibility on zoom close match
-    if (isOpen && Math.abs(state.camera.position.z - targetCameraZ) < 0.05) {
+    if (isOpen && Math.abs(state.camera.position.z - targetCameraZ) < 0.8) {
       onTransitionComplete();
     }
   });

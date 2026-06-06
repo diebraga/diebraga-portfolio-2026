@@ -14,7 +14,7 @@ const IPhoneCanvas = dynamic(() => import("./canvas/IPhoneCanvas"), { ssr: false
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 
-type Phase = "intro" | "portfolio";
+type Phase = "intro" | "static" | "portfolio";
 
 export default function Home() {
   const isMobile = useIsMobile();
@@ -25,8 +25,12 @@ export default function Home() {
   const [isReadyToClick, setIsReadyToClick] = useState(false);
   const [hasPlayedTransition, setHasPlayedTransition] = useState(false);
 
-  // MacBook / IPhone zoom-in complete → show portfolio
+  // MacBook / IPhone zoom-in complete → play static, then portfolio
   const handleIntroComplete = useCallback(() => {
+    setPhase("static");
+  }, []);
+
+  const handleStaticEnd = useCallback(() => {
     setPhase("portfolio");
     start();
   }, [start]);
@@ -73,6 +77,19 @@ export default function Home() {
             }
           </div>
         </>
+      )}
+
+      {/* ── Phase: static TV transition ───────────────────────────────── */}
+      {phase === "static" && (
+        <div className="absolute inset-0 z-50 bg-black flex items-center justify-center">
+          <video
+            src="/static_tv.mp4"
+            autoPlay
+            playsInline
+            onEnded={handleStaticEnd}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </div>
       )}
 
       {/* ── Phase: portfolio (hero + content, fully scrollable) ───────── */}
