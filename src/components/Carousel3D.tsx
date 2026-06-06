@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
 function useTilt(active: boolean) {
@@ -11,18 +11,15 @@ function useTilt(active: boolean) {
     const el = ref.current;
     const unify = (e: MouseEvent | TouchEvent) =>
       "changedTouches" in e ? e.changedTouches[0] : e;
-
     const state: { rect?: DOMRect } = {};
 
-    const onEnter = () => {
-      el.style.transition = "transform 150ms ease-out";
-    };
-    const onMove = (e: MouseEvent | TouchEvent) => {
+    const onEnter = () => { el.style.transition = "transform 150ms ease-out"; };
+    const onMove  = (e: MouseEvent | TouchEvent) => {
       e.preventDefault();
       if (!state.rect) state.rect = el.getBoundingClientRect();
       const u = unify(e);
       el.style.setProperty("--px", ((u.clientX - state.rect.left) / state.rect.width).toFixed(2));
-      el.style.setProperty("--py", ((u.clientY - state.rect.top) / state.rect.height).toFixed(2));
+      el.style.setProperty("--py", ((u.clientY - state.rect.top)  / state.rect.height).toFixed(2));
     };
     const onLeave = () => {
       el.style.setProperty("--px", "0.5");
@@ -30,57 +27,53 @@ function useTilt(active: boolean) {
       el.style.transition = "transform 150ms ease-in";
     };
 
-    el.addEventListener("mouseenter", onEnter);
-    el.addEventListener("mousemove", onMove as EventListener);
-    el.addEventListener("mouseleave", onLeave);
-    el.addEventListener("touchstart", onEnter);
-    el.addEventListener("touchmove", onMove as EventListener, { passive: false });
-    el.addEventListener("touchend", onLeave);
+    el.addEventListener("mouseenter",  onEnter);
+    el.addEventListener("mousemove",   onMove as EventListener);
+    el.addEventListener("mouseleave",  onLeave);
+    el.addEventListener("touchstart",  onEnter);
+    el.addEventListener("touchmove",   onMove as EventListener, { passive: false });
+    el.addEventListener("touchend",    onLeave);
 
     return () => {
-      el.removeEventListener("mouseenter", onEnter);
-      el.removeEventListener("mousemove", onMove as EventListener);
-      el.removeEventListener("mouseleave", onLeave);
-      el.removeEventListener("touchstart", onEnter);
-      el.removeEventListener("touchmove", onMove as EventListener);
-      el.removeEventListener("touchend", onLeave);
+      el.removeEventListener("mouseenter",  onEnter);
+      el.removeEventListener("mousemove",   onMove as EventListener);
+      el.removeEventListener("mouseleave",  onLeave);
+      el.removeEventListener("touchstart",  onEnter);
+      el.removeEventListener("touchmove",   onMove as EventListener);
+      el.removeEventListener("touchend",    onLeave);
     };
   }, [active]);
 
   return ref;
 }
 
-interface SlideProps {
-  image: string;
-  offset: number;
-}
+interface SlideProps { image: string; offset: number; noTransition: boolean; }
 
-function Slide({ image, offset }: SlideProps) {
-  const active = offset === 0;
-  const dir = offset === 0 ? 0 : offset > 0 ? 1 : -1;
+function Slide({ image, offset, noTransition }: SlideProps) {
+  const active  = offset === 0;
+  const dir     = offset === 0 ? 0 : offset > 0 ? 1 : -1;
   const tiltRef = useTilt(active);
 
   return (
     <div
       data-active={active || undefined}
-      style={
-        {
-          gridArea: "1 / -1",
-          position: "relative",
-          zIndex: active ? 2 : 1,
-          pointerEvents: active ? "auto" : "none",
-          "--offset": offset,
-          "--dir": dir,
-          "--px": 0.5,
-          "--py": 0.5,
-        } as React.CSSProperties
-      }
+      style={{
+        gridArea: "1 / -1",
+        position: "relative",
+        zIndex: active ? 2 : 1,
+        pointerEvents: active ? "auto" : "none",
+        ["--offset" as string]: offset,
+        ["--dir"   as string]: dir,
+        ["--px"    as string]: 0.5,
+        ["--py"    as string]: 0.5,
+      } as React.CSSProperties}
     >
       <div
         ref={tiltRef}
         className={active ? "slideContent slideContent--active" : "slideContent"}
         style={{
           backgroundImage: `url('${image}')`,
+          ...(noTransition ? { transition: "none" } : {}),
         }}
       />
     </div>
@@ -98,14 +91,36 @@ export default function Carousel3D({
   autoPlayMs = 4000,
   dragThreshold = 50,
 }: Carousel3DProps) {
-  const [index, setIndex] = useState(0);
-  const hovered = useRef(false);
   const count = images.length;
 
-  const mod = (n: number, m: number) => ((n % m) + m) % m;
-  const prev = useCallback(() => setIndex((i) => mod(i - 1, count)), [count]);
-  const next = useCallback(() => setIndex((i) => mod(i + 1, count)), [count]);
+  // Start in the middle third so we can go either direction infinitely
+  const [index,        setIndex]        = useState(count);
+  const [noTransition, setNoTransition] = useState(false);
+  const hovered   = useRef(false);
+  const normaliseT = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  const prev = useCallback(() => setIndex(i => i - 1), []);
+  const next = useCallback(() => setIndex(i => i + 1), []);
+
+  // After each move, silently reset to middle third once animation finishes
+  useEffect(() => {
+    if (normaliseT.current) clearTimeout(normaliseT.current);
+    normaliseT.current = setTimeout(() => {
+      setIndex(i => {
+        const normalised = i < count ? i + count : i >= count * 2 ? i - count : i;
+        if (normalised !== i) {
+          setNoTransition(true);
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => setNoTransition(false))
+          );
+        }
+        return normalised;
+      });
+    }, 550);
+    return () => clearTimeout(normaliseT.current);
+  }, [index, count]);
+
+  // Auto-play
   useEffect(() => {
     const id = setInterval(() => {
       if (!hovered.current) next();
@@ -115,7 +130,6 @@ export default function Carousel3D({
 
   // Drag / swipe
   const dragStart = useRef<number | null>(null);
-
   const onPointerDown = (e: React.PointerEvent) => {
     if ((e.target as HTMLElement).closest("button")) return;
     dragStart.current = e.clientX;
@@ -129,8 +143,14 @@ export default function Carousel3D({
     dragStart.current = null;
   };
 
-  // Compute offsets: tripled array so wrapping is seamless
-  const tripled = [...images, ...images, ...images];
+  // Tripled array — image at position i = images[i % count]
+  const tripled = useMemo(
+    () => Array.from({ length: count * 3 }, (_, i) => images[i % count]),
+    [images, count]
+  );
+
+  // Active dot (index is always in [count, 2*count-1] after normalisation)
+  const dotIdx = index - count;
 
   return (
     <>
@@ -186,36 +206,18 @@ export default function Carousel3D({
           touchAction: "none",
         }}
       >
-        <button
-          onClick={prev}
-          style={{
-            position: "absolute", left: "5%", top: "40%",
-            transform: "translateY(-50%)", zIndex: 10,
-            background: "transparent", border: "none",
-            color: "white", fontSize: "2rem", cursor: "pointer", opacity: 0.8,
-          }}
-          aria-label="Previous"
-        >
+        <button onClick={prev} style={{ position: "absolute", left: "5%", top: "40%", transform: "translateY(-50%)", zIndex: 10, background: "transparent", border: "none", color: "white", fontSize: "2rem", cursor: "pointer", opacity: 0.8 }} aria-label="Previous">
           <IoChevronBack />
         </button>
 
         <div style={{ display: "grid" }}>
           {tripled.map((img, i) => {
-            const offset = count + (index - i);
-            return <Slide key={i} image={img} offset={offset} />;
+            const offset = index - i;
+            return <Slide key={i} image={img} offset={offset} noTransition={noTransition} />;
           })}
         </div>
 
-        <button
-          onClick={next}
-          style={{
-            position: "absolute", right: "5%", top: "40%",
-            transform: "translateY(-50%)", zIndex: 10,
-            background: "transparent", border: "none",
-            color: "white", fontSize: "2rem", cursor: "pointer", opacity: 0.8,
-          }}
-          aria-label="Next"
-        >
+        <button onClick={next} style={{ position: "absolute", right: "5%", top: "40%", transform: "translateY(-50%)", zIndex: 10, background: "transparent", border: "none", color: "white", fontSize: "2rem", cursor: "pointer", opacity: 0.8 }} aria-label="Next">
           <IoChevronForward />
         </button>
 
@@ -224,12 +226,12 @@ export default function Carousel3D({
           {images.map((_, i) => (
             <button
               key={i}
-              onClick={() => setIndex(i)}
+              onClick={() => setIndex(count + i)}
               aria-label={`Go to slide ${i + 1}`}
               style={{
                 width: 8, height: 8, borderRadius: "50%",
                 border: "none", cursor: "pointer", padding: 0,
-                background: i === index ? "#a855f7" : "rgba(255,255,255,0.3)",
+                background: i === dotIdx ? "#a855f7" : "rgba(255,255,255,0.3)",
                 transition: "background 0.3s",
               }}
             />
