@@ -113,9 +113,11 @@ function ScrollRow({
   direction: 1 | -1;
   tiltDeg: ReturnType<typeof useSpring>;
 }) {
-  const x       = useMotionValue(direction === -1 ? 0 : -rowWidth);
-  const dirRef  = useRef(direction);
-  const paused  = useRef(false);
+  const x          = useMotionValue(direction === -1 ? 0 : -rowWidth);
+  const dirRef     = useRef(direction);
+  const paused     = useRef(false);
+  const touchStartX   = useRef(0);
+  const touchStartMX  = useRef(0);
 
   useAnimationFrame((_, delta) => {
     if (paused.current) return;
@@ -123,15 +125,34 @@ function ScrollRow({
     x.set(wrap(-rowWidth, 0, x.get() + move));
   });
 
-  // 3D tilt on Y axis based on scroll speed + direction of row
   const rotateY = useTransform(tiltDeg, (v) => v * direction * -0.4);
+
+  // ── touch handlers (mobile) ──────────────────────────────────────────────
+  const onTouchStart = (e: React.TouchEvent) => {
+    paused.current    = true;
+    touchStartX.current  = e.touches[0].clientX;
+    touchStartMX.current = x.get();
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    const delta = e.touches[0].clientX - touchStartX.current;
+    x.set(wrap(-rowWidth, 0, touchStartMX.current + delta));
+  };
+  const onTouchEnd = () => {
+    paused.current = false;
+  };
 
   return (
     <div
       className="overflow-hidden"
       style={{ perspective: "1200px" }}
+      // desktop: hover to pause
       onMouseEnter={() => { paused.current = true; }}
       onMouseLeave={() => { paused.current = false; }}
+      // mobile: drag to scrub, release to resume
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
     >
       <motion.div
         style={{

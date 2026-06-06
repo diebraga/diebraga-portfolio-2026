@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Image from "next/image";
-import { motion, useAnimationFrame, useMotionValue, wrap } from "framer-motion";
+import { motion, useAnimationFrame, useMotionValue, wrap, type MotionValue } from "framer-motion";
 import { technologiesByRole } from "../../constants";
 
 const allTechs = technologiesByRole.flatMap((g) => g.techs);
@@ -42,9 +42,11 @@ function MarqueeRow({
   items: typeof allTechs;
   direction?: 1 | -1;
 }) {
-  const x = useMotionValue(0);
+  const x      = useMotionValue(0);
   const totalW = items.length * STEP;
   const paused = useRef(false);
+  const touchStartX  = useRef(0);
+  const touchStartMX = useRef(0);
 
   useAnimationFrame((_, delta) => {
     if (paused.current) return;
@@ -52,15 +54,29 @@ function MarqueeRow({
     x.set(next);
   });
 
+  // ── touch handlers (mobile) ──────────────────────────────────────────────
+  const onTouchStart = (e: React.TouchEvent) => {
+    paused.current       = true;
+    touchStartX.current  = e.touches[0].clientX;
+    touchStartMX.current = x.get();
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    const delta = e.touches[0].clientX - touchStartX.current;
+    x.set(wrap(-totalW, 0, touchStartMX.current + delta));
+  };
+  const onTouchEnd = () => { paused.current = false; };
+
   return (
     <div
       className="overflow-hidden w-full"
-      onMouseEnter={() => {
-        paused.current = true;
-      }}
-      onMouseLeave={() => {
-        paused.current = false;
-      }}
+      // desktop: hover to pause
+      onMouseEnter={() => { paused.current = true; }}
+      onMouseLeave={() => { paused.current = false; }}
+      // mobile: drag to scrub, release to resume
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
     >
       <motion.div style={{ x, display: "flex", gap: GAP, width: totalW * 2 }}>
         {[...items, ...items].map((tech, i) => (
