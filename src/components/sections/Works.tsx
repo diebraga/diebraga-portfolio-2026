@@ -70,15 +70,15 @@ function ProjectCard({ item }: { item: (typeof projects)[0] }) {
         </div>
 
         {/* links */}
-        <div className="flex items-center gap-3 pt-1">
+        <div className="flex items-center gap-2 pt-1">
           <a
             href={item.source_code_link}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-[11px] text-gray-300 hover:text-white transition-colors"
             onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-white bg-white/10 hover:bg-white/20 active:bg-white/25 border border-white/20 hover:border-white/40 transition-all min-h-[36px]"
           >
-            <FaGithub size={13} />
+            <FaGithub size={14} />
             GitHub
           </a>
           {item.live && (
@@ -86,10 +86,11 @@ function ProjectCard({ item }: { item: (typeof projects)[0] }) {
               href={item.live}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors"
               onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-white bg-purple-600/70 hover:bg-purple-600 active:bg-purple-700 border border-purple-500/50 hover:border-purple-400 transition-all min-h-[36px]"
             >
-              Live →
+              <span>Live</span>
+              <span>↗</span>
             </a>
           )}
         </div>
