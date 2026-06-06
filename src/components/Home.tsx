@@ -12,20 +12,7 @@ import { useAudio } from "@/context/AudioContext";
 const LaptopCanvas = dynamic(() => import("./canvas/LaptopCanvas"), { ssr: false });
 const IPhoneCanvas = dynamic(() => import("./canvas/IPhoneCanvas"), { ssr: false });
 
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia("(max-width: 768px)").matches
-      : false
-  );
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 768px)");
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-  return isMobile;
-}
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 type Phase = "intro" | "portfolio";
 
@@ -62,7 +49,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative w-full h-screen bg-[#050816] overflow-hidden">
+    <div className="relative w-full bg-[#050816] overflow-hidden" style={{ height: "100svh" }}>
 
       {/* ── Phase: intro (3D canvas) ──────────────────────────────────── */}
       {phase === "intro" && (

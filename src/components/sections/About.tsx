@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useAnimationFrame, wrap } from "framer-motion";
 
 const MotionImage = motion.create(Image);
 import { styles } from "../../styles";
@@ -30,9 +30,9 @@ interface ServiceCardProps {
 
 const ServiceCard = ({ index, title, icon, icon2 }: ServiceCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const target  = useRef({ x: 0, y: 0 });
+  const target = useRef({ x: 0, y: 0 });
   const current = useRef({ x: 0, y: 0 });
-  const rafId   = useRef<number>(0);
+  const rafId = useRef<number>(0);
 
   useEffect(() => {
     const el = cardRef.current;
@@ -42,10 +42,12 @@ const ServiceCard = ({ index, title, icon, icon2 }: ServiceCardProps) => {
       const rect = el.getBoundingClientRect();
       const cx = (rect.left + rect.right) / 2;
       const cy = (rect.top + rect.bottom) / 2;
-      target.current.x =  remap(e.clientX - cx, rect.width  / 2, ANGLE);
+      target.current.x = remap(e.clientX - cx, rect.width / 2, ANGLE);
       target.current.y = -remap(e.clientY - cy, rect.height / 2, ANGLE);
     };
-    const onLeave = () => { target.current = { x: 0, y: 0 }; };
+    const onLeave = () => {
+      target.current = { x: 0, y: 0 };
+    };
 
     el.addEventListener("mousemove", onMove);
     el.addEventListener("mouseleave", onLeave);
@@ -70,7 +72,7 @@ const ServiceCard = ({ index, title, icon, icon2 }: ServiceCardProps) => {
     <motion.div
       ref={cardRef}
       variants={fadeIn("right", "spring", index * 0.5, 0.75)}
-      className="w-[250px] cursor-pointer relative"
+      className="w-[250px] cursor-pointer relative mb-8"
       style={
         {
           perspective: "50rem",
@@ -115,7 +117,10 @@ const ServiceCard = ({ index, title, icon, icon2 }: ServiceCardProps) => {
         {/* icons — float forward */}
         <div
           className="flex gap-2"
-          style={{ transform: "translateZ(2.5rem)", transformStyle: "preserve-3d" }}
+          style={{
+            transform: "translateZ(2.5rem)",
+            transformStyle: "preserve-3d",
+          }}
         >
           <MotionImage
             animate={{ rotate: 360 }}
@@ -158,6 +163,69 @@ function calculateYearsSince(dateString: string): number {
   return Math.floor(diff / (1000 * 3600 * 24 * 365.25));
 }
 
+// ─── mobile horizontal marquee ────────────────────────────────────────────────
+const CARD_W = 250;
+const CARD_GAP = 20;
+const STEP = CARD_W + CARD_GAP;
+const SPEED = 35; // px/s
+
+function ServiceMarquee() {
+  const items = [...services, ...services]; // doubled for seamless loop
+  const totalW = services.length * STEP;
+  const x = useMotionValue(0);
+  const paused = useRef(false);
+  const touchStartX = useRef(0);
+  const touchStartMX = useRef(0);
+
+  useAnimationFrame((_, delta) => {
+    if (paused.current) return;
+    x.set(wrap(-totalW, 0, x.get() - (SPEED * delta) / 1000));
+  });
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    paused.current = true;
+    touchStartX.current = e.touches[0].clientX;
+    touchStartMX.current = x.get();
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    const delta = e.touches[0].clientX - touchStartX.current;
+    x.set(wrap(-totalW, 0, touchStartMX.current + delta));
+  };
+  const onTouchEnd = () => {
+    paused.current = false;
+  };
+
+  return (
+    <div
+      className="-mx-6 py-6"
+      style={{ overflowX: "clip" }}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
+    >
+      <motion.div
+        style={{
+          x,
+          display: "flex",
+          gap: CARD_GAP,
+          width: totalW * 2,
+        }}
+      >
+        {items.map((service, i) => (
+          <div
+            key={`${service.title}-${i}`}
+            style={{ flexShrink: 0, width: CARD_W }}
+          >
+            <ServiceCard index={i % services.length} {...service} />
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── section ──────────────────────────────────────────────────────────────────
 const About = () => {
   return (
     <>
@@ -167,7 +235,7 @@ const About = () => {
       </motion.div>
 
       <div className="flex flex-wrap mt-5 sm:flex-col justify-center items-center">
-        <div className="w-full">
+        <div className="w-full -mx-6 sm:mx-0">
           <Carousel3D images={photoImages} />
         </div>
 
@@ -183,7 +251,13 @@ const About = () => {
         </motion.p>
       </div>
 
-      <div className="mt-20 flex flex-wrap gap-10 justify-evenly sm:justify-center">
+      {/* Mobile — horizontal scrolling strip */}
+      <div className="mt-16 sm:hidden">
+        <ServiceMarquee />
+      </div>
+
+      {/* Desktop — original grid */}
+      <div className="hidden sm:flex mt-20 flex-wrap gap-10 justify-evenly">
         {services.map((service, index) => (
           <ServiceCard key={service.title} index={index} {...service} />
         ))}

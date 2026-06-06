@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, RefObject } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useScroll, useSpring, useTransform, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { IoArrowForward } from "react-icons/io5";
@@ -32,6 +33,7 @@ export default function ParallaxSceneSection({
 }: {
   container?: RefObject<HTMLElement | null>;
 }) {
+  const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
@@ -249,7 +251,7 @@ export default function ParallaxSceneSection({
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 4000 2000"
+              viewBox={isMobile ? "0 0 4000 1400" : "0 0 4000 2000"}
               preserveAspectRatio="xMinYMin slice"
               height="100%"
               width="100%"
