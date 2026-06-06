@@ -5,17 +5,19 @@ import { navLinks } from "../../constants";
 
 // All section ids in order (hero first)
 const allSections = [
-  { id: "hero", title: "Hero" },
+  { id: "hero", title: "Home" },
   ...navLinks.map((n) => ({ id: n.id, title: n.title })),
 ];
 
 const Navbar = () => {
-  const [active,    setActive]    = useState("Hero");
+  const [active,    setActive]    = useState("Home");
   const [toggle,    setToggle]    = useState(false);
   const [scrolled,  setScrolled]  = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const isScrollingRef = useRef(false);
-  const prevScrollTop  = useRef(0);
+  const isScrollingRef  = useRef(false);
+  const prevScrollTop   = useRef(0);
+  const intentionalHide = useRef(false);
+  const isNearBottom    = useRef(false);
 
   // Collapse near bottom, restore on scroll-up or back to top
   useEffect(() => {
@@ -29,8 +31,14 @@ const Navbar = () => {
         const nearBottom = scrollTop + scroller.clientHeight >= scroller.scrollHeight - 300;
         const scrollingUp = scrollTop < prevScrollTop.current - 5;
 
-        if (nearBottom)                      setCollapsed(true);
-        if (scrollingUp || scrollTop < 120)  setCollapsed(false);
+        isNearBottom.current = nearBottom;
+
+        if (nearBottom)                     setCollapsed(true);
+        if (scrollingUp || scrollTop < 120) {
+          intentionalHide.current = false;
+          isNearBottom.current = false;
+          setCollapsed(false);
+        }
       }
 
       prevScrollTop.current = scrollTop;
@@ -40,10 +48,15 @@ const Navbar = () => {
     return () => window.removeEventListener("portfolio-scroll", handleScroll);
   }, []);
 
-  // Restore when user hovers within 80px of the top
+  // Show when hovering top 80px, re-hide when moving away if still near bottom
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
-      if (e.clientY < 80) setCollapsed(false);
+      if (e.clientY < 80) {
+        intentionalHide.current = false;
+        setCollapsed(false);
+      } else if (isNearBottom.current) {
+        setCollapsed(true);
+      }
     };
     window.addEventListener("mousemove", onMouseMove);
     return () => window.removeEventListener("mousemove", onMouseMove);
@@ -97,8 +110,10 @@ const Navbar = () => {
     isScrollingRef.current = true;
     setTimeout(() => { isScrollingRef.current = false; }, 1000);
 
-    // Contact → scroll to absolute bottom of the scroll container
+    // Contact → collapse immediately and scroll to bottom
     if (id === "contact") {
+      intentionalHide.current = true;
+      setCollapsed(true);
       const scroller = document.querySelector(".overflow-y-auto") as HTMLElement;
       if (scroller) {
         scroller.scrollTo({ top: scroller.scrollHeight, behavior: "smooth" });
