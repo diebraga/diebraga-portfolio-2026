@@ -54,21 +54,14 @@ export default function HeroPage({ onViewPortfolio }: HeroPageProps) {
       className="relative w-full overflow-hidden"
       style={{ backgroundColor: "#0b0013", height: "100svh" }}
     >
-      {/* Loading pulse */}
-      {!videoLoaded && (
-        <div className="absolute inset-0 bg-[#0b0013] flex justify-center items-center">
-          <div className="animate-ping h-10 w-10 rounded-full bg-purple-700" />
-        </div>
-      )}
-
-      {/* Background video */}
+      {/* Background video — fades in once loaded */}
       <video
         autoPlay
         muted
         loop
         playsInline
-        className="rotate-180 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full w-auto h-auto object-cover pointer-events-none"
-        style={{ zIndex: 0 }}
+        className="rotate-180 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full w-auto h-auto object-cover pointer-events-none transition-opacity duration-1000"
+        style={{ zIndex: 0, opacity: videoLoaded ? 1 : 0 }}
         onLoadedData={() => setVideoLoaded(true)}
         tabIndex={-1}
       >
