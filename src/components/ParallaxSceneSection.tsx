@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, RefObject } from "react";
+import { useRef, RefObject, useState } from "react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useScroll, useSpring, useTransform, motion } from "framer-motion";
+import TerminalModal from "./TerminalModal";
 import { Button } from "@/components/ui/button";
 import { IoArrowForward } from "react-icons/io5";
 import Tech from "./sections/Tech";
@@ -35,6 +36,7 @@ export default function ParallaxSceneSection({
   container?: RefObject<HTMLElement | null>;
 }) {
   const isMobile = useIsMobile();
+  const [terminalOpen, setTerminalOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
@@ -123,15 +125,22 @@ export default function ParallaxSceneSection({
             y: btnY,
           }}
         >
-          <a href="mailto:diebraga.developer@gmail.com">
-            <Button
-              variant="outline"
-              className="animate-pulse shadow-xl shadow-purple-300/50 text-purple-100 border-purple-200 border-4 flex items-center gap-2 bg-transparent hover:bg-purple-900/30 hover:text-purple-100 px-8 py-6 text-base"
-            >
-              <strong>Get In Touch</strong>
-              <IoArrowForward size={20} className="text-purple-100" />
-            </Button>
-          </a>
+          {isMobile ? (
+            <a href="mailto:diebraga.developer@gmail.com">
+              <Button variant="outline" className="animate-pulse shadow-xl shadow-purple-300/50 text-purple-100 border-purple-200 border-4 flex items-center gap-2 bg-transparent hover:bg-purple-900/30 hover:text-purple-100 px-8 py-6 text-base">
+                <strong>Get In Touch</strong>
+                <IoArrowForward size={20} className="text-purple-100" />
+              </Button>
+            </a>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => setTerminalOpen(true)} className="animate-pulse shadow-xl shadow-purple-300/50 text-purple-100 border-purple-200 border-4 flex items-center gap-2 bg-transparent hover:bg-purple-900/30 hover:text-purple-100 px-8 py-6 text-base">
+                <strong>Get In Touch</strong>
+                <IoArrowForward size={20} className="text-purple-100" />
+              </Button>
+              <TerminalModal open={terminalOpen} onClose={() => setTerminalOpen(false)} />
+            </>
+          )}
         </motion.div>
 
         {/* Scene — absolute inside the sticky frame, not fixed */}
