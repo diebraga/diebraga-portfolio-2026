@@ -248,6 +248,9 @@ const About = () => {
           React, Next.js, and Node.js. I have over{" "}
           {calculateYearsSince("2019-10-01")} years of industry experience
           building amazing experiences ✨.
+          <br /><br />
+          <span className="text-[#aaa6c3]">Languages: </span>
+          <span className="text-white">Portuguese · Spanish · English · French · Italian</span>
         </motion.p>
       </div>
 
@@ -262,6 +265,7 @@ const About = () => {
           <ServiceCard key={service.title} index={index} {...service} />
         ))}
       </div>
+
     </>
   );
 };
