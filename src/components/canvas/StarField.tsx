@@ -35,10 +35,12 @@ export default function StarField({
     [count, radius]
   );
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     if (ref.current) {
-      ref.current.rotation.x -= delta / 10;
-      ref.current.rotation.y -= delta / 15;
+      const { x, y } = state.pointer;
+      // base auto-rotation + gentle cursor drift
+      ref.current.rotation.x -= delta / 10 - y * delta * 0.18;
+      ref.current.rotation.y -= delta / 15 - x * delta * 0.18;
     }
   });
 

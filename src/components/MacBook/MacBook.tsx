@@ -76,11 +76,22 @@ export function MacBook({
     );
 
     if (outerGroupRef.current) {
-      // 4. Smooth Y-Axis Rotation Flip (Turns back to front)
-      const targetRotationY = isOpen ? 0 : Math.PI;
+      // cursor influence — only while closed (pre-click state)
+      const { x: px, y: py } = state.pointer;
+      const cursorY = !isOpen ? Math.PI + px * 0.28 : 0;
+      const cursorX = !isOpen ? py * -0.18 : 0;
+
+      // 4. Smooth Y-Axis Rotation Flip + cursor tilt
       outerGroupRef.current.rotation.y = THREE.MathUtils.lerp(
         outerGroupRef.current.rotation.y,
-        targetRotationY,
+        cursorY,
+        0.05,
+      );
+
+      // cursor X tilt (pitch)
+      outerGroupRef.current.rotation.x = THREE.MathUtils.lerp(
+        outerGroupRef.current.rotation.x,
+        cursorX,
         0.05,
       );
 

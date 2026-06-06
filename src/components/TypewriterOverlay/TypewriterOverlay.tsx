@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export function TypewriterOverlay({ onComplete }: { onComplete: () => void }) {
+  const isMobile = useIsMobile();
   const [line1, setLine1] = useState("");
   const [line2, setLine2] = useState("");
   const [activeLine, setActiveLine] = useState(1);
 
   useEffect(() => {
     const textLine1 = "Hello Stranger...";
-    const textLine2 = "(Click anywhere to start)";
+    const textLine2 = isMobile ? "(Tap anywhere to start)" : "(Click anywhere to start)";
 
     let index1 = 0;
     let index2 = 0;
@@ -77,12 +79,13 @@ export function TypewriterOverlay({ onComplete }: { onComplete: () => void }) {
       </h2>
 
       {/* Line 2 */}
-      <h3 className="text-sm md:text-base font-mono font-light tracking-wide text-gray-400 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] h-6">
+      <h3
+        className="text-sm md:text-base font-mono font-medium tracking-wide text-white h-6"
+        style={{ textShadow: "0 0 12px rgba(168,85,247,0.8), 0 0 24px rgba(168,85,247,0.4)" }}
+      >
         {line2}
         {(activeLine === 2 || activeLine === 3) && (
-          <span className="animate-[pulse_0.8s_infinite] ml-1 text-[#b350b5]">
-            █
-          </span>
+          <span className="animate-[pulse_0.8s_infinite] ml-1 text-purple-400">█</span>
         )}
       </h3>
     </div>
