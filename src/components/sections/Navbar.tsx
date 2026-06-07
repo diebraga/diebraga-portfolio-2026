@@ -128,7 +128,7 @@ const Navbar = () => {
   return (
     <nav
       className={`sm:px-16 px-6 w-full flex items-center py-5 fixed top-0 z-20 backdrop-blur-sm transition-colors duration-300 ${
-        scrolled ? "bg-[#0b0013]/90" : "bg-[#0b0013]/40"
+        scrolled ? "bg-black/90" : "bg-black/40"
       }`}
       style={{
         transform: collapsed ? "translateY(-110%)" : "translateY(0)",
@@ -167,7 +167,7 @@ const Navbar = () => {
           <div
             className={`${
               !toggle ? "hidden" : "flex"
-            } p-6 bg-gradient-to-b from-[#0b0013] to-[#1a0030] absolute top-20 right-0 mx-4 my-2 min-w-[160px] z-10 rounded-xl border border-purple-800/40`}
+            } p-6 bg-gradient-to-b from-black to-[#0a0015] absolute top-20 right-0 mx-4 my-2 min-w-[160px] z-10 rounded-xl border border-purple-800/40`}
           >
             <ul className="list-none flex justify-end items-start flex-1 flex-col gap-4">
               {allSections.map(({ id, title }) => (

@@ -156,7 +156,8 @@ const ServiceCard = ({ index, title, icon, icon2 }: ServiceCardProps) => {
   );
 };
 
-const photoImages = ["/d1.png", "/d2.png", "/d3.png", "/d4.jpeg", "/d5.jpeg"];
+const photoImages  = ["/d1.png",     "/d2.png",     "/d3.png",     "/d4.jpeg", "/d5.jpeg"];
+const photoVideos  = ["/ai-d1.mp4", "/ai-d2.mp4", "/ai-d3.mp4", "/d4.mp4",  "/ai-d5.mp4"];
 
 function calculateYearsSince(dateString: string): number {
   const diff = new Date().getTime() - new Date(dateString).getTime();
@@ -236,7 +237,7 @@ const About = () => {
 
       <div className="flex flex-wrap mt-5 sm:flex-col justify-center items-center">
         <div className="w-full -mx-6 sm:mx-0">
-          <Carousel3D images={photoImages} />
+          <Carousel3D images={photoImages} videos={photoVideos} />
         </div>
 
         <motion.p

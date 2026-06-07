@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo, useLayoutEffect } from "react";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
 function useTilt(active: boolean) {
@@ -47,9 +47,32 @@ function useTilt(active: boolean) {
   return ref;
 }
 
-interface SlideProps { image: string; offset: number; noTransition: boolean; }
+// Mounts a video and triggers play() programmatically — reliable across browsers
+function ActiveVideo({ src, style }: { src: string; style: React.CSSProperties }) {
+  const ref = useRef<HTMLVideoElement>(null);
 
-function Slide({ image, offset, noTransition }: SlideProps) {
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.currentTime = 0;
+    el.play().catch(() => {});
+  }, [src]);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      muted
+      loop
+      playsInline
+      style={style}
+    />
+  );
+}
+
+interface SlideProps { image: string; video?: string; offset: number; noTransition: boolean; }
+
+function Slide({ image, video, offset, noTransition }: SlideProps) {
   const active  = offset === 0;
   const dir     = offset === 0 ? 0 : offset > 0 ? 1 : -1;
   const tiltRef = useTilt(active);
@@ -68,6 +91,7 @@ function Slide({ image, offset, noTransition }: SlideProps) {
         ["--py"    as string]: 0.5,
       } as React.CSSProperties}
     >
+      {/* image — grayscale filter here only */}
       <div
         ref={tiltRef}
         className={active ? "slideContent slideContent--active" : "slideContent"}
@@ -76,18 +100,37 @@ function Slide({ image, offset, noTransition }: SlideProps) {
           ...(noTransition ? { transition: "none" } : {}),
         }}
       />
+
+      {/* AI video — outside the filter, plays in full colour when active */}
+      {active && video && (
+        <ActiveVideo
+          src={video}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: 250,
+            height: 300,
+            objectFit: "cover",
+            borderRadius: 15,
+            zIndex: 3,
+            transform: `perspective(1000px) translateX(0px)`,
+          }}
+        />
+      )}
     </div>
   );
 }
 
 interface Carousel3DProps {
   images: string[];
+  videos?: string[];
   autoPlayMs?: number;
   dragThreshold?: number;
 }
 
 export default function Carousel3D({
   images,
+  videos,
   autoPlayMs = 4000,
   dragThreshold = 50,
 }: Carousel3DProps) {
@@ -163,7 +206,6 @@ export default function Carousel3D({
           border-radius: 15px;
           opacity: 0.55;
           filter: grayscale(100%) brightness(0.75);
-          box-shadow: 0 0 0 1px #7c3aed55, 0 0 12px 2px rgba(124,58,237,0.25);
           transform-style: preserve-3d;
           transition: transform 0.5s ease-in-out, opacity 0.5s, filter 0.5s, box-shadow 0.5s;
           transform: perspective(1000px)
@@ -173,9 +215,6 @@ export default function Carousel3D({
         .slideContent--active {
           opacity: 1;
           filter: grayscale(100%) brightness(1.05);
-          box-shadow: 0 0 0 2px #a855f7,
-            0 0 25px 6px rgba(168,85,247,0.55),
-            0 0 60px 10px rgba(168,85,247,0.2);
           transform: perspective(1000px) translateX(calc(100% * var(--offset)));
         }
         .slideContent--active:hover {
@@ -213,7 +252,8 @@ export default function Carousel3D({
         <div style={{ display: "grid" }}>
           {tripled.map((img, i) => {
             const offset = index - i;
-            return <Slide key={i} image={img} offset={offset} noTransition={noTransition} />;
+            const vidSrc = videos ? videos[i % count] : undefined;
+            return <Slide key={i} image={img} video={vidSrc} offset={offset} noTransition={noTransition} />;
           })}
         </div>
 
