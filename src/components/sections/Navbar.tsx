@@ -128,7 +128,7 @@ const Navbar = () => {
   return (
     <nav
       className={`sm:px-16 px-6 w-full flex items-center py-5 fixed top-0 z-20 backdrop-blur-sm transition-colors duration-300 ${
-        scrolled ? "bg-black/90" : "bg-black/40"
+        scrolled ? "bg-black/90" : "bg-transparent"
       }`}
       style={{
         transform: collapsed ? "translateY(-110%)" : "translateY(0)",
