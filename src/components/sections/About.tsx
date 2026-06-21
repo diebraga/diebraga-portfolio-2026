@@ -10,6 +10,7 @@ import { services } from "../../constants";
 import SectionWrapper from "../../hoc/SectionWrapper";
 import { fadeIn, textVariant } from "../../utils/motion";
 import Carousel3D from "../Carousel3D";
+import SectionHeading from "../SectionHeading";
 
 const ANGLE = 20;
 
@@ -72,7 +73,7 @@ const ServiceCard = ({ index, title, icon, icon2 }: ServiceCardProps) => {
     <motion.div
       ref={cardRef}
       variants={fadeIn("right", "spring", index * 0.5, 0.75)}
-      className="w-[250px] cursor-pointer relative mb-8"
+      className="w-[250px] relative mb-8"
       style={
         {
           perspective: "50rem",
@@ -230,10 +231,7 @@ function ServiceMarquee() {
 const About = () => {
   return (
     <>
-      <motion.div variants={textVariant()}>
-        <p className={`${styles.sectionSubText} text-center`}>Introduction</p>
-        <h2 className={`${styles.sectionHeadText} text-center`}>Overview</h2>
-      </motion.div>
+      <SectionHeading subText="Introduction" headText="Overview" />
 
       <div className="flex flex-wrap mt-5 sm:flex-col justify-center items-center">
         <div className="w-full -mx-6 sm:mx-0">

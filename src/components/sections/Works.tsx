@@ -14,6 +14,7 @@ import {
 import { FaGithub } from "react-icons/fa";
 import { styles } from "../../styles";
 import { textVariant } from "../../utils/motion";
+import SectionHeading from "../SectionHeading";
 import { projects } from "../../constants";
 import SectionWrapper from "../../hoc/SectionWrapper";
 
@@ -215,10 +216,7 @@ function ProjectsMarquee() {
 // ─── section ──────────────────────────────────────────────────────────────────
 const Works = () => (
   <>
-    <motion.div variants={textVariant()}>
-      <p className={styles.sectionSubText}>My work</p>
-      <h2 className={styles.sectionHeadText}>Personal Projects</h2>
-    </motion.div>
+    <SectionHeading subText="My work" headText="Personal Projects" />
 
     <motion.p
       initial={{ opacity: 0 }}

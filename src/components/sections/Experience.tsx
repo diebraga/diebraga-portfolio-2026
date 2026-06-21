@@ -6,6 +6,7 @@ import { styles } from "../../styles";
 import { textVariant, fadeIn } from "../../utils/motion";
 import { experiences } from "../../constants";
 import SectionWrapper from "../../hoc/SectionWrapper";
+import SectionHeading from "../SectionHeading";
 import CareerFlow from "../CareerFlow";
 
 // ─── mobile: HTML cards with centered glowing pole behind ────────────────────
@@ -79,10 +80,7 @@ function MobileExperienceList() {
 // ─── section ──────────────────────────────────────────────────────────────────
 const Experience = () => (
   <>
-    <motion.div variants={textVariant()}>
-      <p className={`${styles.sectionSubText} text-center`}>What I have done so far</p>
-      <h2 className={`${styles.sectionHeadText} text-center`}>Work Experience</h2>
-    </motion.div>
+    <SectionHeading subText="What I have done so far" headText="Work Experience" />
 
     {/* Mobile — HTML cards with glowing pole */}
     <div className="sm:hidden">
