@@ -1,19 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import {
   motion,
   useAnimationFrame,
   useMotionValue,
-  useSpring,
-  useTransform,
-  useVelocity,
   wrap,
 } from "framer-motion";
 import { FaGithub } from "react-icons/fa";
-import { styles } from "../../styles";
-import { textVariant } from "../../utils/motion";
 import SectionHeading from "../SectionHeading";
 import { projects } from "../../constants";
 import SectionWrapper from "../../hoc/SectionWrapper";
@@ -108,30 +103,23 @@ function ScrollRow({
   items,
   rowWidth,
   direction,
-  tiltDeg,
 }: {
   items: (typeof projects);
   rowWidth: number;
   direction: 1 | -1;
-  tiltDeg: ReturnType<typeof useSpring>;
 }) {
-  const x          = useMotionValue(direction === -1 ? 0 : -rowWidth);
-  const dirRef     = useRef(direction);
-  const paused     = useRef(false);
-  const touchStartX   = useRef(0);
-  const touchStartMX  = useRef(0);
+  const x         = useMotionValue(direction === -1 ? 0 : -rowWidth);
+  const paused    = useRef(false);
+  const touchStartX  = useRef(0);
+  const touchStartMX = useRef(0);
 
   useAnimationFrame((_, delta) => {
     if (paused.current) return;
-    const move = dirRef.current * BASE_SPD * (delta / 1000);
-    x.set(wrap(-rowWidth, 0, x.get() + move));
+    x.set(wrap(-rowWidth, 0, x.get() + direction * BASE_SPD * (delta / 1000)));
   });
 
-  const rotateY = useTransform(tiltDeg, (v) => v * direction * -0.4);
-
-  // ── touch handlers (mobile) ──────────────────────────────────────────────
   const onTouchStart = (e: React.TouchEvent) => {
-    paused.current    = true;
+    paused.current     = true;
     touchStartX.current  = e.touches[0].clientX;
     touchStartMX.current = x.get();
   };
@@ -139,32 +127,20 @@ function ScrollRow({
     const delta = e.touches[0].clientX - touchStartX.current;
     x.set(wrap(-rowWidth, 0, touchStartMX.current + delta));
   };
-  const onTouchEnd = () => {
-    paused.current = false;
-  };
+  const onTouchEnd = () => { paused.current = false; };
 
   return (
     <div
       className="overflow-hidden"
-      style={{ perspective: "1200px" }}
-      // desktop: hover to pause
       onMouseEnter={() => { paused.current = true; }}
       onMouseLeave={() => { paused.current = false; }}
-      // mobile: drag to scrub, release to resume
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       onTouchCancel={onTouchEnd}
     >
       <motion.div
-        style={{
-          x,
-          rotateY,
-          display: "flex",
-          gap: GAP,
-          width: rowWidth * 2,
-          willChange: "transform",
-        }}
+        style={{ x, display: "flex", gap: GAP, width: rowWidth * 2, willChange: "transform" }}
       >
         {[...items, ...items].map((item, i) => (
           <ProjectCard key={`${item.title}-${i}`} item={item} />
@@ -176,39 +152,10 @@ function ScrollRow({
 
 // ─── main section ─────────────────────────────────────────────────────────────
 function ProjectsMarquee() {
-  // feed page scroll into a MotionValue so useVelocity can track it
-  const scrollY        = useMotionValue(0);
-  const rawVelocity    = useVelocity(scrollY);
-
-  // smooth + dampen the velocity  →  tilt angle in degrees
-  const tiltDeg = useSpring(
-    useTransform(rawVelocity, [-3000, 3000], [-12, 12], { clamp: true }),
-    { damping: 40, stiffness: 200 }
-  );
-
-  // listen to portfolio-scroll custom event
-  useEffect(() => {
-    const handler = (e: Event) =>
-      scrollY.set((e as CustomEvent).detail.scrollTop as number);
-    window.addEventListener("portfolio-scroll", handler as EventListener);
-    return () =>
-      window.removeEventListener("portfolio-scroll", handler as EventListener);
-  }, [scrollY]);
-
   return (
     <div className="flex flex-col gap-6 mt-10 -mx-6 sm:-mx-16">
-      <ScrollRow
-        items={ROW_A}
-        rowWidth={ROW_A_W}
-        direction={-1}
-        tiltDeg={tiltDeg}
-      />
-      <ScrollRow
-        items={ROW_B}
-        rowWidth={ROW_B_W}
-        direction={1}
-        tiltDeg={tiltDeg}
-      />
+      <ScrollRow items={ROW_A} rowWidth={ROW_A_W} direction={-1} />
+      <ScrollRow items={ROW_B} rowWidth={ROW_B_W} direction={1} />
     </div>
   );
 }
