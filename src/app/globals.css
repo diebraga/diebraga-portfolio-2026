@@ -2,6 +2,16 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@keyframes orbit {
+  0% { transform: rotate(calc(var(--angle, 0deg))) translateX(calc(var(--radius) * 1px)) rotate(calc(-1 * var(--angle, 0deg))); }
+  100% { transform: rotate(calc(var(--angle, 0deg) + 360deg)) translateX(calc(var(--radius) * 1px)) rotate(calc(-1 * (var(--angle, 0deg) + 360deg))); }
+}
+
+.animate-orbit {
+  animation: orbit calc(var(--duration) * 1s) linear infinite;
+  animation-delay: calc(var(--delay) * 1s);
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

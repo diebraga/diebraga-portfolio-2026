@@ -6,7 +6,8 @@ import { useScroll, useSpring, useTransform, motion } from "framer-motion";
 import TerminalModal from "./TerminalModal";
 import { Button } from "@/components/ui/button";
 import { IoArrowForward } from "react-icons/io5";
-import Tech from "./sections/Tech";
+import { TechOrbitDisplay, buildOrbitIcons } from "./blocks/tech-orbit-display";
+import { technologiesByRole } from "@/constants";
 import TwinklingStars from "./TwinklingStars";
 
 const springConfig = {
@@ -95,8 +96,11 @@ export default function ParallaxSceneSection({
             Have an idea?<br />Let&apos;s build it.
           </h2>
         </div>
-        <div style={{ padding: "1.5rem 1rem 0", pointerEvents: "auto" }}>
-          <Tech />
+        <div style={{ display: "flex", justifyContent: "center", pointerEvents: "auto" }}>
+          <TechOrbitDisplay
+            iconsArray={buildOrbitIcons(technologiesByRole)}
+            text="."
+          />
         </div>
       </div>
 
