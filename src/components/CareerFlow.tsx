@@ -28,6 +28,7 @@ const DESKTOP_POS = [
   { x:   20, y: 220 },
   { x: -360, y: 450 },
   { x:   20, y: 720 },
+  { x: -360, y: 980 },
 ] as const;
 
 const MOBILE_GAP = 28; // equal px gap between bottom of card N and top of card N+1
@@ -185,7 +186,7 @@ function CareerFlowInner() {
   const [isMobile, setIsMobile]     = useState(false);
   const [containerW, setContainerW] = useState(360);
   const [activeId, setActiveId]     = useState<string | null>(null);
-  const [canvasH, setCanvasH]       = useState(1200);
+  const [canvasH, setCanvasH]       = useState(1450);
   const wrapperRef                  = useRef<HTMLDivElement>(null);
   const measuredH                   = useRef<Map<string, number>>(new Map());
   const didReposition               = useRef(false);
@@ -223,7 +224,7 @@ function CareerFlowInner() {
     const g = buildGraph(isMobile, null, mobileCardW);
     setNodes(g.nodes);
     setEdges(g.edges);
-    if (!isMobile) setCanvasH(1200);
+    if (!isMobile) setCanvasH(1450);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile, mobileCardW]);
 
