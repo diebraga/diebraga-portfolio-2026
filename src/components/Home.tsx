@@ -35,6 +35,13 @@ export default function Home() {
     start();
   }, [start]);
 
+  // Mobile browsers can block/stall the transition video; never let it trap the user
+  useEffect(() => {
+    if (phase !== "static") return;
+    const t = setTimeout(handleStaticEnd, 3000);
+    return () => clearTimeout(t);
+  }, [phase, handleStaticEnd]);
+
   // 3-D intro click (one-shot transition sound)
   const handleIntroClick = useCallback(() => {
     if (!isReadyToClick || hasPlayedTransition) return;
@@ -85,8 +92,10 @@ export default function Home() {
           <video
             src="/static_tv.mp4"
             autoPlay
+            muted
             playsInline
             onEnded={handleStaticEnd}
+            onError={handleStaticEnd}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         </div>
