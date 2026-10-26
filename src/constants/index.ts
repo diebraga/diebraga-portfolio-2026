@@ -86,24 +86,24 @@ export const technologiesByRole = [
 
 export const experiences = [
   {
-    title: "Full Stack Web Developer",
+    title: "Full Stack Developer",
     company_name: "Kosmos",
     icon: "/kos.webp",
     iconBg: "#000",
     date: "Oct 2019 - Mar 2021",
     points: [
-      "Developing frontend applications using Next.js and Chakra UI.",
+      "Developing frontend applications using React, Next.js and BabylonJS.",
       "Manipulating 3D scenes using Babylon.js or Three.js to provide users with an immersive gaming experience.",
       "Implementing responsive design and ensuring a seamless gaming experience across desktop and mobile devices.",
       "Developing and maintaining various Node.js microservices that communicate via REST, WebSockets and gRPC protocols.",
     ],
   },
   {
-    title: "React Developer",
+    title: "Frontend Engineer",
     company_name: "Templ8",
     icon: "/tech/8.png",
     iconBg: "#000",
-    date: "Apr 2021 - Dec 2022",
+    date: "Apr 2021 - Dec 2021",
     points: [
       "Developing and maintaining web applications using Next.js, Chakra UI and other related technologies.",
       "Implementing responsive design and ensuring cross-browser compatibility.",
@@ -126,7 +126,7 @@ export const experiences = [
     ],
   },
   {
-    title: "Senior Software Engineer",
+    title: "Senior Frontend Engineer",
     company_name: "Glass Lewis",
     icon: "/company/glass-lewis.svg",
     iconBg: "#fff",
@@ -136,6 +136,19 @@ export const experiences = [
       "Architected and developed new frontend products using Micro-frontend architecture (Native Federation) and TypeScript.",
       "Containerized deployments using Docker and managed pipelines via Azure DevOps.",
       "Maintained legacy Angular systems while driving the transition toward modern frontend standards.",
+    ],
+  },
+  {
+    title: "Software Engineer",
+    company_name: "GlobalLogic",
+    icon: "/company/globallogic.png",
+    iconBg: "#fff",
+    date: "July 2026 – Present",
+    points: [
+      "Core engineering team member at Liberty IT, modernizing and retiring legacy financial applications.",
+      "Maintaining and enhancing financial applications using React, JavaScript and TypeScript.",
+      "Developing backend services and APIs with Express, NestJS and Java.",
+      "Writing automated end-to-end tests with Playwright and contributing to CI/CD workflows with GitHub Actions.",
     ],
   },
 ];
